@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RUST_ROOT="$DIR/../handwritten-src/rust"
 
-pushd $"RUST_ROOT" > /dev/null
+pushd "$RUST_ROOT" > /dev/null
 
 cargo build --lib
 
