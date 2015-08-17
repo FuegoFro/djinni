@@ -1,0 +1,11 @@
+[root]
+name = "djinni_test_suite"
+version = "0.1.0"
+dependencies = [
+ "djinni_rust_generated 0.1.0",
+]
+
+[[package]]
+name = "djinni_rust_generated"
+version = "0.1.0"
+

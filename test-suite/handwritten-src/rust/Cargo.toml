@@ -1,0 +1,11 @@
+[package]
+name = "djinni_test_suite"
+version = "0.1.0"
+
+[lib]
+name = "djinni_test_suite"
+path = "src/lib.rs"
+crate_type = ["dylib"]
+
+[dependencies.djinni_rust_generated]
+path = "../../generated-src/rust"
