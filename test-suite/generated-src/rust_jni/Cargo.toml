@@ -1,0 +1,3 @@
+[package]
+name = "djinni_rust_jni_generated"
+version = "0.1.0"

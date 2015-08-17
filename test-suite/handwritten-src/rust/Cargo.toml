@@ -9,3 +9,6 @@ crate_type = ["dylib"]
 
 [dependencies.djinni_rust_generated]
 path = "../../generated-src/rust"
+
+[dependencies.djinni_rust_jni_generated]
+path = "../../generated-src/rust_jni"
