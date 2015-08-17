@@ -83,6 +83,8 @@ object Main {
     var yamlOutFolder: Option[File] = None
     var yamlOutFile: Option[String] = None
     var yamlPrefix: String = ""
+    var rustOutFolder: Option[File] = None
+    var rustJniOutFolder: Option[File] = None
 
     val argParser = new scopt.OptionParser[Unit]("djinni") {
 
@@ -206,6 +208,10 @@ object Main {
         .text("Optional file in which to write the list of output files produced.")
       opt[Boolean]("skip-generation").valueName("<true/false>").foreach(x => skipGeneration = x)
         .text("Way of specifying if file generation should be skipped (default: false)")
+      opt[File]("rust-out").valueName("<out-folder>").foreach(x => rustOutFolder = Some(x))
+        .text("The output for the Rust files (Generator disabled if unspecified).")
+      opt[File]("rust-jni-out").valueName("<out-folder>").foreach(x => rustJniOutFolder = Some(x))
+        .text("The output for the JNI Rust files (Generator disabled if unspecified).")
 
       note("\nIdentifier styles (ex: \"FooBar\", \"fooBar\", \"foo_bar\", \"FOO_BAR\", \"m_fooBar\")\n")
       identStyle("ident-java-enum",      c => { javaIdentStyle = javaIdentStyle.copy(enum = c) })
@@ -355,7 +361,9 @@ object Main {
       skipGeneration,
       yamlOutFolder,
       yamlOutFile,
-      yamlPrefix)
+      yamlPrefix,
+      rustOutFolder,
+      rustJniOutFolder)
 
 
     try {
