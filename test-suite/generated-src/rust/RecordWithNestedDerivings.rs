@@ -3,5 +3,5 @@
 
 pub struct RecordWithNestedDerivings {
     pub key: i32,
-    // field rec not implemented
+    // would be rec, but MDef not implemented
 }

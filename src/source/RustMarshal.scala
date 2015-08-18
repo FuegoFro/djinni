@@ -12,7 +12,8 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
   override def paramType(tm: MExpr): String = toRustType(tm)
   override def fqParamType(tm: MExpr): String = throw new AssertionError("not implemented")
 
-  override def returnType(ret: Option[TypeRef]): String = throw new AssertionError("not implemented")
+  // Returns "" if there's no return type, " -> Type" if there is.
+  override def returnType(ret: Option[TypeRef]): String = ret.fold("")(ty => " -> " + toRustType(ty.resolved))
   override def fqReturnType(ret: Option[TypeRef]): String = throw new AssertionError("not implemented")
 
   override def fieldType(tm: MExpr): String = toRustType(tm)
