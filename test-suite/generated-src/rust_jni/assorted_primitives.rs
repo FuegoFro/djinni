@@ -10,7 +10,7 @@ impl JType for NativeAssortedPrimitives {
     type JniType = jobject;
 
     #[allow(non_snake_case)]
-    pub fn to_rust(jni_env: *mut JNIEnv, j: jobject) -> AssortedPrimitives {
+    fn to_rust(jni_env: *mut JNIEnv, j: jobject) -> AssortedPrimitives {
         // Todo - have a local scope here
         // Todo - use a helper to get the class/methods
         let class = support_lib::support::get_class(jni_env, "com.dropbox.djinni.test.AssortedPrimitives");
@@ -30,25 +30,25 @@ impl JType for NativeAssortedPrimitives {
         let field_mOFsixtyfour = support_lib::support::get_method(jni_env, class, "mOFsixtyfour", "Ljava/lang/Double;");
 
         assert!(j != 0 as jobject);
-        AssortedPrimitives::new(
-                support_lib::support::Bool::to_rust(jni_env, f!(jni_env, GetBooleanField, j, field_mB)),
-                support_lib::support::I8::to_rust(jni_env, f!(jni_env, GetByteField, j, field_mEight)),
-                support_lib::support::I16::to_rust(jni_env, f!(jni_env, GetShortField, j, field_mSixteen)),
-                support_lib::support::I32::to_rust(jni_env, f!(jni_env, GetIntField, j, field_mThirtytwo)),
-                support_lib::support::I64::to_rust(jni_env, f!(jni_env, GetLongField, j, field_mSixtyfour)),
-                support_lib::support::F32::to_rust(jni_env, f!(jni_env, GetFloatField, j, field_mFthirtytwo)),
-                support_lib::support::F64::to_rust(jni_env, f!(jni_env, GetDoubleField, j, field_mFsixtyfour)),
-                support_lib::support::Optional::<support_lib::support::Bool>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOB)),
-                support_lib::support::Optional::<support_lib::support::I8>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOEight)),
-                support_lib::support::Optional::<support_lib::support::I16>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOSixteen)),
-                support_lib::support::Optional::<support_lib::support::I32>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOThirtytwo)),
-                support_lib::support::Optional::<support_lib::support::I64>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOSixtyfour)),
-                support_lib::support::Optional::<support_lib::support::F32>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOFthirtytwo)),
-                support_lib::support::Optional::<support_lib::support::F64>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOFsixtyfour)),
-        )
+        AssortedPrimitives {
+                b: support_lib::support::Bool::to_rust(jni_env, f!(jni_env, GetBooleanField, j, field_mB)),
+                eight: support_lib::support::I8::to_rust(jni_env, f!(jni_env, GetByteField, j, field_mEight)),
+                sixteen: support_lib::support::I16::to_rust(jni_env, f!(jni_env, GetShortField, j, field_mSixteen)),
+                thirtytwo: support_lib::support::I32::to_rust(jni_env, f!(jni_env, GetIntField, j, field_mThirtytwo)),
+                sixtyfour: support_lib::support::I64::to_rust(jni_env, f!(jni_env, GetLongField, j, field_mSixtyfour)),
+                fthirtytwo: support_lib::support::F32::to_rust(jni_env, f!(jni_env, GetFloatField, j, field_mFthirtytwo)),
+                fsixtyfour: support_lib::support::F64::to_rust(jni_env, f!(jni_env, GetDoubleField, j, field_mFsixtyfour)),
+                o_b: support_lib::support::Optional::<support_lib::support::Bool>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOB)),
+                o_eight: support_lib::support::Optional::<support_lib::support::I8>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOEight)),
+                o_sixteen: support_lib::support::Optional::<support_lib::support::I16>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOSixteen)),
+                o_thirtytwo: support_lib::support::Optional::<support_lib::support::I32>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOThirtytwo)),
+                o_sixtyfour: support_lib::support::Optional::<support_lib::support::I64>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOSixtyfour)),
+                o_fthirtytwo: support_lib::support::Optional::<support_lib::support::F32>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOFthirtytwo)),
+                o_fsixtyfour: support_lib::support::Optional::<support_lib::support::F64>::to_rust(jni_env, f!(jni_env, GetObjectField, j, field_mOFsixtyfour)),
+        }
     }
 
-    pub fn from_rust(jni_env: *mut JNIEnv, r: AssortedPrimitives) -> jobject {
+    fn from_rust(jni_env: *mut JNIEnv, r: AssortedPrimitives) -> jobject {
         0 as jobject
     }
 

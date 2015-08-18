@@ -1,4 +1,6 @@
 use std::ffi::CString;
+use std::marker::PhantomData;
+use libc::{c_int, c_uint, c_long, c_double};
 use support_lib::jni_ffi::{
     JNIEnv,
     jclass,
@@ -12,7 +14,6 @@ use support_lib::jni_ffi::{
     jdouble,
     jobject,
 };
-use std::marker::PhantomData;
 
 // Helper for calling a method on the JNIEnv.
 #[macro_export]
@@ -56,6 +57,7 @@ macro_rules! primitive_marshal {
         $java_class_spec:expr,
         $static_box_method:expr,
         $static_box_method_signature:expr,
+        $box_jni_variadic_type:ty,
         $static_unbox_method:expr,
         $static_unbox_method_signature:expr,
         $unbox_jni_method:ident
@@ -82,7 +84,7 @@ macro_rules! primitive_marshal {
             fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
                 let class = get_class(jni_env, $java_class_spec);
                 let method = get_method(jni_env, class, $static_box_method, $static_box_method_signature);
-                f!(jni_env, CallStaticObjectMethod, class, method, Self::from_rust(jni_env, r))
+                f!(jni_env, CallStaticObjectMethod, class, method, Self::from_rust(jni_env, r) as $box_jni_variadic_type)
             }
         }
     }
@@ -115,16 +117,16 @@ impl JType for Bool {
     fn from_rust_boxed(jni_env: *mut JNIEnv, r: bool) -> jobject {
         let class = get_class(jni_env, "java/lang/Boolean");
         let method = get_method(jni_env, class, "valueOf", "(Z)Ljava/lang/Boolean;");
-        f!(jni_env, CallStaticObjectMethod, class, method, Self::from_rust(jni_env, r))
+        f!(jni_env, CallStaticObjectMethod, class, method, Self::from_rust(jni_env, r) as c_uint)
     }
 }
 
-primitive_marshal!(I8, i8, jbyte, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", "byteValue", "()B", CallByteMethod);
-primitive_marshal!(I16, i16, jshort, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", "shortValue", "()S", CallShortMethod);
-primitive_marshal!(I32, i32, jint, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", "intValue", "()I", CallIntMethod);
-primitive_marshal!(I64, i64, jlong, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", "longValue", "()J", CallLongMethod);
-primitive_marshal!(F32, f32, jfloat, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", "floatValue", "()F", CallFloatMethod);
-primitive_marshal!(F64, f64, jdouble, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", "doubleValue", "()D", CallDoubleMethod);
+primitive_marshal!(I8, i8, jbyte, "java/lang/Byte", "valueOf", "(B)Ljava/lang/Byte;", c_uint, "byteValue", "()B", CallByteMethod);
+primitive_marshal!(I16, i16, jshort, "java/lang/Short", "valueOf", "(S)Ljava/lang/Short;", c_int, "shortValue", "()S", CallShortMethod);
+primitive_marshal!(I32, i32, jint, "java/lang/Integer", "valueOf", "(I)Ljava/lang/Integer;", c_int, "intValue", "()I", CallIntMethod);
+primitive_marshal!(I64, i64, jlong, "java/lang/Long", "valueOf", "(J)Ljava/lang/Long;", c_long, "longValue", "()J", CallLongMethod);
+primitive_marshal!(F32, f32, jfloat, "java/lang/Float", "valueOf", "(F)Ljava/lang/Float;", c_double, "floatValue", "()F", CallFloatMethod);
+primitive_marshal!(F64, f64, jdouble, "java/lang/Double", "valueOf", "(D)Ljava/lang/Double;", c_double, "doubleValue", "()D", CallDoubleMethod);
 
 #[macro_export]
 macro_rules! boxed_call_through {
@@ -156,7 +158,7 @@ impl<T: JType> JType for Optional<T> {
 
     fn from_rust(jni_env: *mut JNIEnv, r: Option<T::RustType>) -> jobject {
         match r {
-            Some(value) => T::from_rust_boxed(value),
+            Some(value) => T::from_rust_boxed(jni_env, value),
             None => 0 as jobject,
         }
     }

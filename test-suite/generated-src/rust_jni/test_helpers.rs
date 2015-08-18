@@ -1,3 +1,4 @@
+use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use test_helpers;
 use generated_rust_jni;
