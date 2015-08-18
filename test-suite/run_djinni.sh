@@ -32,8 +32,8 @@ jni_out="$base_dir/generated-src/jni"
 objc_out="$base_dir/generated-src/objc"
 java_out="$base_dir/generated-src/java/com/dropbox/djinni/test"
 yaml_out="$base_dir/generated-src/yaml"
-rust_out="$base_dir/generated-src/rust"
-rust_jni_out="$base_dir/generated-src/rust-jni"
+rust_out="$base_dir/generated-src/rust_in_progress"
+rust_jni_out="$base_dir/generated-src/rust_jni_in_progress"
 
 java_package="com.dropbox.djinni.test"
 
@@ -122,7 +122,7 @@ fi
     \
     --rust-out "$temp_out_relative/rust" \
     \
-    --rust-jni-out "$temp_out_relative/rust-jni" \
+    --rust-jni-out "$temp_out_relative/rust_jni" \
     \
     --list-in-files "./generated-src/inFileList.txt" \
     --list-out-files "./generated-src/outFileList.txt"\
@@ -159,7 +159,7 @@ cp "$base_dir/djinni/yaml-test.djinni" "$temp_out/yaml"
     \
     --rust-out "$temp_out/rust" \
     \
-    --rust-jni-out "$temp_out/rust-jni" \
+    --rust-jni-out "$temp_out/rust_jni" \
     \
     --idl "$temp_out_relative/yaml/yaml-test.djinni" \
 )
@@ -180,7 +180,7 @@ mirror "java" "$temp_out/java" "$java_out"
 mirror "jni" "$temp_out/jni" "$jni_out"
 mirror "objc" "$temp_out/objc" "$objc_out"
 mirror "rust" "$temp_out/rust" "$rust_out"
-mirror "rust-jni" "$temp_out/rust-jni" "$rust_jni_out"
+mirror "rust-jni" "$temp_out/rust_jni" "$rust_jni_out"
 
 date > "$gen_stamp"
 
