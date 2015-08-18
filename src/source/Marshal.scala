@@ -49,4 +49,10 @@ abstract class Marshal(spec: Spec) {
     }
 
   protected def withCppNs(t: String) = withNs(Some(spec.cppNamespace), t)
+
+  protected def withRustCrate(namespace: Option[String], t: String) = namespace match {
+    case None => t
+    case Some("") => t
+    case Some(s) => s + "::" + t
+  }
 }
