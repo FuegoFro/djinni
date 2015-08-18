@@ -7,8 +7,11 @@ name = "djinni_test_suite"
 path = "src/lib.rs"
 crate_type = ["dylib"]
 
-[dependencies.djinni_rust_generated]
-path = "../../generated-src/rust"
+[dependencies]
+libc = "0.1.0"
 
-[dependencies.djinni_rust_jni_generated]
-path = "../../generated-src/rust_jni"
+#[dependencies.djinni_rust_generated]
+#path = "../../generated-src/rust"
+#
+#[dependencies.djinni_rust_jni_generated]
+#path = "../../generated-src/rust_jni"

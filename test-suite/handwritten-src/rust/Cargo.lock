@@ -2,15 +2,11 @@
 name = "djinni_test_suite"
 version = "0.1.0"
 dependencies = [
- "djinni_rust_generated 0.1.0",
- "djinni_rust_jni_generated 0.1.0",
+ "libc 0.1.10 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
-name = "djinni_rust_generated"
-version = "0.1.0"
-
-[[package]]
-name = "djinni_rust_jni_generated"
-version = "0.1.0"
+name = "libc"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
 
