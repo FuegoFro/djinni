@@ -28,9 +28,9 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
         case o =>
           val base = o match {
             case p: MPrimitive => p.rustName
-            case MString => "str"
+            case MString => "String"
             case MDate => throw new AssertionError("MDate not implemented")
-            case MBinary => "Slice<u8>"
+            case MBinary => "Box<[u8]>"
             case MOptional => throw new AssertionError("optional should have been special cased")
             case MList => throw new AssertionError("MList not implemented")
             case MSet => throw new AssertionError("MSet not implemented")

@@ -3,5 +3,5 @@
 
 pub struct Constants {
     pub some_integer: i32,
-    pub some_string: str,
+    pub some_string: String,
 }

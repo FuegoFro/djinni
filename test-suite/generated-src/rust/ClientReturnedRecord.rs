@@ -3,6 +3,6 @@
 
 pub struct ClientReturnedRecord {
     pub record_id: i64,
-    pub content: str,
-    pub misc: Optional<str>,
+    pub content: String,
+    pub misc: Optional<String>,
 }

@@ -3,5 +3,5 @@
 
 pub struct RecordWithDerivings {
     pub key1: i32,
-    pub key2: str,
+    pub key2: String,
 }
