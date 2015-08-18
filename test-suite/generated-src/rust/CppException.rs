@@ -3,5 +3,5 @@
 
 pub trait CppException {
     // non-static method throw_an_exception goes here
-    // would be get, but MDef not implemented
+    // would be get, but DInterface not implemented
 }

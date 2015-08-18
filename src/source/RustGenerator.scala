@@ -11,7 +11,15 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustOutFolder.get)(name, origin, f)
 
   override def generateEnum(origin: String, ident: Ident, doc: Doc, e: Enum) {
-    writeFile(ident.name, origin, (w: IndentWriter) => {})
+    writeFile(ident.name, origin, (w: IndentWriter) => {
+      val rustName = idRust.ty(ident)
+      w.w(s"pub enum $rustName").braced {
+        for (o <- e.options) {
+          // TODO(rustgen): write documentation
+          w.wl(idRust.enum(o.ident) + ",")
+        }
+      }
+    })
   }
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {

@@ -36,7 +36,12 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
           case MList => "Vec"
           case MSet => "HashSet"
           case MMap => "HashMap"
-          case d: MDef => throw new AssertionError("MDef not implemented")
+          case d: MDef =>
+            d.defType match {
+              case DEnum => idRust.ty(d.name)
+              case DRecord => idRust.ty(d.name)
+              case DInterface => throw new AssertionError("DInterface not implemented")
+            }
           case e: MExtern => throw new AssertionError("extern should have been special cased")
           case p: MParam => throw new AssertionError("MParam not implemented")
         }

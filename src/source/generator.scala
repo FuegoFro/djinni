@@ -128,7 +128,7 @@ package object generatorTools {
     val javaDefault = JavaIdentStyle(camelUpper, camelUpper, camelLower, camelLower, camelLower, underCaps, underCaps)
     val cppDefault = CppIdentStyle(camelUpper, camelUpper, camelUpper, underLower, underLower, underLower, underCaps, underCaps)
     val objcDefault = ObjcIdentStyle(camelUpper, camelUpper, camelLower, camelLower, camelLower, camelUpper, camelUpper)
-    val rustDefault = RustIdentStyle(camelUpper, underLower, underLower, underLower, underCaps)
+    val rustDefault = RustIdentStyle(camelUpper, underLower, underLower, camelUpper, underCaps)
 
     val styles = Map(
       "FooBar" -> camelUpper,
