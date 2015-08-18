@@ -20,27 +20,27 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
   override def fqFieldType(tm: MExpr): String = throw new AssertionError("not implemented")
 
   private def toRustType(tm: MExpr): String = {
-      tm.base match {
-        case MOptional =>
-          assert(tm.args.size == 1)
-          val arg = toRustType(tm.args.head)
-          s"Optional<$arg>"
-        case e: MExtern => throw new AssertionError("MExtern not implemented")
-        case o =>
-          val base = o match {
-            case p: MPrimitive => p.rustName
-            case MString => "String"
-            case MDate => throw new AssertionError("MDate not implemented")
-            case MBinary => "Box<[u8]>"
-            case MOptional => throw new AssertionError("optional should have been special cased")
-            case MList => throw new AssertionError("MList not implemented")
-            case MSet => throw new AssertionError("MSet not implemented")
-            case MMap => throw new AssertionError("MMap not implemented")
-            case d: MDef => throw new AssertionError("MDef not implemented")
-            case e: MExtern => throw new AssertionError("extern should have been special cased")
-            case p: MParam => throw new AssertionError("MParam not implemented")
-          }
-          base
+    def args(tm: MExpr) = if (tm.args.isEmpty) "" else tm.args.map(toRustType).mkString("<", ", ", ">")
+    tm.base match {
+      case MOptional =>
+        assert(tm.args.size == 1)
+        "Optional" + args(tm)
+      case e: MExtern => throw new AssertionError("MExtern not implemented")
+      case o =>
+        val base = o match {
+          case p: MPrimitive => p.rustName
+          case MString => "String"
+          case MDate => throw new AssertionError("MDate not implemented")
+          case MBinary => "Box<[u8]>"
+          case MOptional => throw new AssertionError("optional should have been special cased")
+          case MList => "Vec"
+          case MSet => "HashSet"
+          case MMap => "HashMap"
+          case d: MDef => throw new AssertionError("MDef not implemented")
+          case e: MExtern => throw new AssertionError("extern should have been special cased")
+          case p: MParam => throw new AssertionError("MParam not implemented")
+        }
+        base + args(tm)
       }
   }
 }

@@ -8,15 +8,15 @@ pub trait TestHelpers {
     // would be check_primitive_list, but MDef not implemented
     // would be get_nested_collection, but MDef not implemented
     // would be check_nested_collection, but MDef not implemented
-    // would be get_map, but MMap not implemented
-    // would be check_map, but MMap not implemented
-    // would be get_empty_map, but MMap not implemented
-    // would be check_empty_map, but MMap not implemented
+    fn get_map() -> HashMap<String, i64>;
+    fn check_map(m: HashMap<String, i64>) -> bool;
+    fn get_empty_map() -> HashMap<String, i64>;
+    fn check_empty_map(m: HashMap<String, i64>) -> bool;
     // would be get_map_list_record, but MDef not implemented
     // would be check_map_list_record, but MDef not implemented
     // would be check_client_interface_ascii, but MDef not implemented
     // would be check_client_interface_nonascii, but MDef not implemented
-    // would be check_enum_map, but MMap not implemented
+    // would be check_enum_map, but MDef not implemented
     // would be check_enum, but MDef not implemented
     // would be token_id, but MDef not implemented
     // would be create_cpp_token, but MDef not implemented
