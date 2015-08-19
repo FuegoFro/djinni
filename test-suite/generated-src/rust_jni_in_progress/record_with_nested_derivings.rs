@@ -6,8 +6,7 @@ use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
 
-impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedDerivings
-{
+impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedDerivings {
     type JniType = jobject;
 
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
@@ -24,7 +23,7 @@ impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedD
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/RecordWithNestedDerivings");

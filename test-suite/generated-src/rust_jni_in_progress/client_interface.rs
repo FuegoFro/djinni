@@ -4,3 +4,42 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+impl JType for Arc<Box<ClientInterface>> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        Arc::new(Box::new(ClientInterfaceJavaProxy { javaRef: j }))
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+        // TODO(rustgen): this
+        0 as jobject
+    }
+
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        Self::to_rust(jni_env, j)
+    }
+
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        Self::from_rust(jni_env, r)
+    }
+}
+
+struct ClientInterfaceJavaProxy {
+    javaRef: jobject
+}
+
+impl ClientInterface for ClientInterfaceJavaProxy {
+    fn get_record(&self, record_id: i64, utf8string: String, misc: Option<String>) -> ClientReturnedRecord {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+    fn identifier_check(&self, data: Box<[u8]>, r: i32, jret: i64) -> f64 {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+    fn return_str(&self) -> String {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+}

@@ -42,7 +42,7 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
             d.defType match {
               case DEnum => idRust.ty(d.name)
               case DRecord => idRust.ty(d.name)
-              case DInterface => s"Arc${if(scoped)"::" else ""}<Box<${idRust.ty(d.name)}>>"
+              case DInterface => interfaceName(d.name, scoped)
             }
           case e: MExtern => throw new AssertionError("extern should have been special cased")
           case p: MParam => throw new AssertionError("MParam not implemented")
@@ -51,5 +51,8 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
       }
   }
   def toRustType(tm: MExpr): String = toRustType(false)(tm)
+
+  def interfaceName(name: String, scoped: Boolean = false): String =
+    s"Arc${if(scoped)"::" else ""}<Box<${idRust.ty(name)}>>"
 
 }

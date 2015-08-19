@@ -4,3 +4,34 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+impl JType for Arc<Box<UserToken>> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        Arc::new(Box::new(UserTokenJavaProxy { javaRef: j }))
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+        // TODO(rustgen): this
+        0 as jobject
+    }
+
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        Self::to_rust(jni_env, j)
+    }
+
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        Self::from_rust(jni_env, r)
+    }
+}
+
+struct UserTokenJavaProxy {
+    javaRef: jobject
+}
+
+impl UserToken for UserTokenJavaProxy {
+    fn whoami(&self) -> String {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+}

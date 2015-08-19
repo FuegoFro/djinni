@@ -214,3 +214,24 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkInterfaceNullity
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkInterfaceNullityReturn(jni_env: *mut JNIEnv, _class: jclass, j_i: jobject) {
     ::test_helpers::check_interface_nullity_return(Arc::<Box<NullityInterface>>::to_rust(jni_env, j_i))
 }
+impl JType for Arc<Box<TestHelpers>> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        Arc::new(Box::new(TestHelpersJavaProxy { javaRef: j }))
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+        // TODO(rustgen): this
+        0 as jobject
+    }
+
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        Self::to_rust(jni_env, j)
+    }
+
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        Self::from_rust(jni_env, r)
+    }
+}
+

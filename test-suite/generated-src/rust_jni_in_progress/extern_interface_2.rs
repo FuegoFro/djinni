@@ -4,3 +4,31 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+impl JType for Arc<Box<ExternInterface2>> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        Arc::new(Box::new(ExternInterface2JavaProxy { javaRef: j }))
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+        // TODO(rustgen): this
+        0 as jobject
+    }
+
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        Self::to_rust(jni_env, j)
+    }
+
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        Self::from_rust(jni_env, r)
+    }
+}
+
+struct ExternInterface2JavaProxy {
+    javaRef: jobject
+}
+
+impl ExternInterface2 for ExternInterface2JavaProxy {
+    // would be foo, but MExtern not implemented
+}

@@ -4,3 +4,46 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+impl JType for Arc<Box<NullityInterface>> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        Arc::new(Box::new(NullityInterfaceJavaProxy { javaRef: j }))
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+        // TODO(rustgen): this
+        0 as jobject
+    }
+
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        Self::to_rust(jni_env, j)
+    }
+
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        Self::from_rust(jni_env, r)
+    }
+}
+
+struct NullityInterfaceJavaProxy {
+    javaRef: jobject
+}
+
+impl NullityInterface for NullityInterfaceJavaProxy {
+    fn non_null_parameters(&self, p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterface>>) {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+    fn non_null_return(&self, should_return_null: bool) -> Arc<Box<DummyInterface>> {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+    fn nullable_parameters(&self, p1: Option<Arc<Box<DummyInterface>>>, p2: Option<Arc<Box<DummyInterface>>>) {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+    fn nullable_return(&self, should_return_null: bool) -> Option<Arc<Box<DummyInterface>>> {
+        // TODO(rustgen): handle local refs correctly
+        let jmethod = jni_invoke!(jni_env, 
+    }
+}
