@@ -8,9 +8,9 @@ use generated_rust::user_token::UserToken;
 impl JType for Arc<Box<UserToken>> {
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+    fn to_rust(_jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         Arc::new(Box::new(UserTokenJavaProxy {
-            javaRef: j,
+            java_ref: j,
         }))
     }
 
@@ -29,18 +29,20 @@ impl JType for Arc<Box<UserToken>> {
     boxed_call_through!();
 }
 
-// impl NativeUserToken {
-//     fn get_proxy_object<T: Any>(obj: &T) -> &Any {
-//         obj as &Any
-//     }
-// }
-
 struct UserTokenJavaProxy {
-    javaRef: jobject,
+    // Todo - have a global ref to the object
+    java_ref: jobject,
 }
 
 impl UserToken for UserTokenJavaProxy {
     fn whoami(&self) -> String {
-        "".to_string()
+        let jni_env = ::support_lib::support::jni_get_thread_env();
+        // Todo - local scope
+        // Todo - use helper to cache class object and method IDs
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
+        let method = ::support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
+        // Todo - unpack the global ref
+        let ret = jni_invoke!(jni_env, CallObjectMethod, self.java_ref, method);
+        String::to_rust(jni_env, ret)
     }
 }

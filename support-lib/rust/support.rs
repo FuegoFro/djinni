@@ -1,6 +1,7 @@
 use std::ffi::CString;
 use libc::{c_int, c_uint, c_long, c_double};
 use support_lib::jni_ffi::{
+    JavaVM,
     JNIEnv,
     jclass,
     jmethodID,
@@ -14,13 +15,46 @@ use support_lib::jni_ffi::{
     jdouble,
     jobject,
     jstring,
+    JNI_VERSION_1_6,
 };
 
-// Helper for calling a method on the JNIEnv.
+// Helper for calling a method on the JNIEnv or JavaVM.
 #[macro_export]
 macro_rules! jni_invoke {
     ($env:expr, $field:ident$( ,$arg:expr)*) => {
         ((unsafe { &*(*$env).functions }).$field)($env, $($arg,)*)
+    }
+}
+
+static mut global_cached_jvm: Option<JavaVmWrapper> = None;
+
+struct JavaVmWrapper(*mut JavaVM);
+
+unsafe impl Sync for JavaVmWrapper {}
+
+pub fn jni_init(jvm: *mut JavaVM) {
+    // Todo - make sure this is safe
+    unsafe { global_cached_jvm = Some(JavaVmWrapper(jvm)); }
+    // Todo - initialize cached class stuff here.
+}
+
+pub fn jni_shutdown() {
+    // Todo - make sure this is safe
+    unsafe { global_cached_jvm = None; }
+}
+
+pub fn jni_get_thread_env() -> *mut JNIEnv {
+    // Todo - make sure this is safe
+    match unsafe { &global_cached_jvm } {
+        &Some(ref jvm_wrapper) => {
+            let &JavaVmWrapper(ref jvm) = jvm_wrapper;
+            let mut env: *mut JNIEnv = 0 as *mut JNIEnv;
+            let env_handle: *mut *mut JNIEnv = &mut env;
+            let get_res = jni_invoke!(*jvm, GetEnv, env_handle, JNI_VERSION_1_6);
+            assert!(get_res == 0 && env != 0 as *mut JNIEnv);
+            env
+        },
+        &None => panic!(),
     }
 }
 
@@ -52,6 +86,10 @@ pub fn get_field(jni_env: *mut JNIEnv, class: jclass, name: &str, signature: &st
     let c_sig = c_str(signature);
     jni_invoke!(jni_env, GetFieldID, class, c_name.as_ptr(), c_sig.as_ptr())
 }
+
+/*
+ * Implementations of the conversions to/from rust.
+ */
 
 pub trait JType {
     type JniType: ForVariadic;
@@ -183,6 +221,14 @@ impl JType for String {
     boxed_call_through!();
 }
 
+/*
+ * Helpers for converting strings between UTF8 and UTF16
+ */
+
+/*
+ * Help translate the jni types to sizes that are
+ * able to be passed to variadic functions.
+ */
 
 pub trait ForVariadic {
     type VariadicType;
