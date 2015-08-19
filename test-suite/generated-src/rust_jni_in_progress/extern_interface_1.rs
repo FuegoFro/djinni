@@ -3,5 +3,4 @@
 
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
-use extern_interface_1;
 use generated_rust_jni;

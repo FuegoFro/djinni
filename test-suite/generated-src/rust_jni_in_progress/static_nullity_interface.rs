@@ -3,5 +3,4 @@
 
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
-use static_nullity_interface;
 use generated_rust_jni;

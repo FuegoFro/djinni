@@ -4,5 +4,5 @@
 pub struct ClientReturnedRecord {
     pub record_id: i64,
     pub content: String,
-    pub misc: Optional<String>,
+    pub misc: Option<String>,
 }

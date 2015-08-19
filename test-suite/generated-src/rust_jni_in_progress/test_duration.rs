@@ -3,5 +3,4 @@
 
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
-use test_duration;
 use generated_rust_jni;

@@ -23,7 +23,7 @@ pub trait TestHelpers {
     // would be check_cpp_token, but DInterface not implemented
     // would be cpp_token_id, but DInterface not implemented
     // would be check_token_type, but DInterface not implemented
-    fn return_none() -> Optional<i32>;
+    fn return_none() -> Option<i32>;
     fn assorted_primitives_id(i: AssortedPrimitives) -> AssortedPrimitives;
     fn id_binary(b: Box<[u8]>) -> Box<[u8]>;
     // would be get_nullity_interface, but DInterface not implemented

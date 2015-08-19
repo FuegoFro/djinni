@@ -1,7 +1,7 @@
 package djinni
 
 import djinni.ast._
-import djinni.generatorTools.Spec
+import djinni.generatorTools._
 import djinni.writer.IndentWriter
 
 class RustGenerator(spec: Spec) extends Generator(spec) {
@@ -43,18 +43,16 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val rustName = idRust.ty(ident)
+      // TODO(rustgen): imports
       w.w(s"pub trait $rustName").braced {
         for (f <- i.methods) {
           val methodName = idRust.method(f.ident)
           try {
             def paramFormat(param: Field) = idRust.field(param.ident) + ": " + marshal.paramType(param.ty)
-            val params = f.params.map(paramFormat).mkString(", ")
+            var params = f.params.map(paramFormat).mkString(", ")
+            params = if (f.static) params else "&self" + preComma(params)
             val returnType = marshal.returnType(f.ret)
-            if (f.static) {
-              w.wl(s"fn $methodName($params)$returnType;")
-            } else {
-              w.wl(s"// non-static method $methodName goes here")
-            }
+            w.wl(s"fn $methodName($params)$returnType;")
           } catch {
             case e: AssertionError => w.wl(s"// would be $methodName, but " + e.getMessage)
           }

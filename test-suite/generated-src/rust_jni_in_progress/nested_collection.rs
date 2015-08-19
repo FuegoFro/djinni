@@ -5,27 +5,24 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::nested_collection::NestedCollection;
 
-pub struct NativeNestedCollection;
-impl JType for NativeNestedCollection
+impl JType for ::generated_rust::nested_collection::NestedCollection
 {
-    type RustType = NestedCollection;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
-        let field_set_list = support_lib::support::get_method(jni_env, class, "mSetList", "Ljava/util/ArrayList;");
+        let field_set_list = support_lib::support::get_field(jni_env, class, "mSetList", "Ljava/util/ArrayList;");
 
         assert!(j != 0 as jobject);
-        NestedCollection {
-            set_list: support_lib::support::List::<support_lib::support::Set::<support_lib::support::String>>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_set_list)),
+        ::generated_rust::nested_collection::NestedCollection {
+            set_list: Vec::<HashSet<String>>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_set_list)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
@@ -33,14 +30,14 @@ impl JType for NativeNestedCollection
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::List::<support_lib::support::Set::<support_lib::support::String>>::from_rust(jni_env, r.set_list).for_variadic()))
+                                                      Vec::<HashSet<String>>::from_rust(jni_env, r.set_list).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }

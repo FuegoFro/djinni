@@ -19,18 +19,20 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
   override def fieldType(tm: MExpr): String = toRustType(tm)
   override def fqFieldType(tm: MExpr): String = throw new AssertionError("not implemented")
 
-  private def toRustType(tm: MExpr): String = {
-    def args(tm: MExpr) = if (tm.args.isEmpty) "" else tm.args.map(toRustType).mkString("<", ", ", ">")
+  def toRustType(scoped: Boolean)(tm: MExpr): String = {
+    def args(tm: MExpr) =
+      if (tm.args.isEmpty) ""
+      else tm.args.map(toRustType(false)).mkString(if (scoped) "::<" else "<", ", ", ">")
     tm.base match {
       case MOptional =>
         assert(tm.args.size == 1)
-        "Optional" + args(tm)
+        "Option" + args(tm)
       case e: MExtern => throw new AssertionError("MExtern not implemented")
       case o =>
         val base = o match {
           case p: MPrimitive => p.rustName
           case MString => "String"
-          case MDate => throw new AssertionError("MDate not implemented")
+          case MDate => "Tm"
           case MBinary => "Box<[u8]>"
           case MOptional => throw new AssertionError("optional should have been special cased")
           case MList => "Vec"
@@ -48,4 +50,6 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
         base + args(tm)
       }
   }
+  def toRustType(tm: MExpr): String = toRustType(false)(tm)
+
 }

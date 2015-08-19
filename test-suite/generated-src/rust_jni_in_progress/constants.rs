@@ -5,29 +5,26 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::constants::Constants;
 
-pub struct NativeConstants;
-impl JType for NativeConstants
+impl JType for ::generated_rust::constants::Constants
 {
-    type RustType = Constants;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/Constants");
-        let field_some_integer = support_lib::support::get_method(jni_env, class, "mSomeInteger", "I");
-        let field_some_string = support_lib::support::get_method(jni_env, class, "mSomeString", "Ljava/lang/String;");
+        let field_some_integer = support_lib::support::get_field(jni_env, class, "mSomeInteger", "I");
+        let field_some_string = support_lib::support::get_field(jni_env, class, "mSomeString", "Ljava/lang/String;");
 
         assert!(j != 0 as jobject);
-        Constants {
-            some_integer: support_lib::support::I32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_some_integer)),
-            some_string: support_lib::support::String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_some_string)),
+        ::generated_rust::constants::Constants {
+            some_integer: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_some_integer)),
+            some_string: String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_some_string)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/Constants");
@@ -35,15 +32,15 @@ impl JType for NativeConstants
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::I32::from_rust(jni_env, r.some_integer).for_variadic(),
-                                                      support_lib::support::String::from_rust(jni_env, r.some_string).for_variadic()))
+                                                      i32::from_rust(jni_env, r.some_integer).for_variadic(),
+                                                      String::from_rust(jni_env, r.some_string).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }

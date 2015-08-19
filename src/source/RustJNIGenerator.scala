@@ -38,21 +38,17 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
-      val rustName = idRust.ty(ident)
-      val nativeName = "Native" + rustName
+      val fqRustName = s"::generated_rust::${idRust.module(ident)}::${idRust.ty(ident)}"
 
       w.wl("#[macro_use(jni_invoke)]")
       w.wl("use support_lib;")
       w.wl("use support_lib::support::{JType, ForVaridaic};")
       w.wl("use support_lib::jni_ffi::{JNIEnv, jobject};") // This list shouldn't be hardcoded
-      w.wl(s"use generated_rust::${idRust.module(ident)}::$rustName;")
       w.wl
-      w.wl(s"pub struct $nativeName;")
-      w.wl(s"impl JType for $nativeName").braced {
-        w.wl(s"type RustType = $rustName;")
+      w.wl(s"impl JType for $fqRustName").braced {
         w.wl("type JniType = jobject;")
         w.wl
-        w.w("fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType").braced {
+        w.w("fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self").braced {
           w.wl("// TODO(rustgen): have a local scope here")
           w.wl("// TODO(rustgen): use a helper to get the class/methods so they're cached")
           val classLookup = q(jniMarshal.undecoratedTypename(ident, r))
@@ -61,11 +57,11 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
             val rustField = idRust.field(f.ident)
             val javaFieldName = idJava.field(f.ident)
             val javaSig = q(jniMarshal.fqTypename(f.ty))
-            w.wl(s"let field_$rustField = support_lib::support::get_method(jni_env, class, ${q(javaFieldName)}, $javaSig);")
+            w.wl(s"let field_$rustField = support_lib::support::get_field(jni_env, class, ${q(javaFieldName)}, $javaSig);")
           }
           w.wl
           w.wl("assert!(j != 0 as jobject);")
-          w.w(rustName).braced {
+          w.w(fqRustName).braced {
             for (f <- r.fields) {
               val rustField = idRust.field(f.ident)
               val fieldId = "field_" + rustField
@@ -80,7 +76,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
           }
         }
         w.wl
-        w.w("fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType").braced {
+        w.w("fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType").braced {
           w.wl("// TODO(rustgen): cache the class/methods")
           w.wl("// TODO(rustgen): class object should have a ref around it")
           val classLookup = q(jniMarshal.undecoratedTypename(ident, r))
@@ -107,11 +103,11 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
           }
         }
         w.wl
-        w.w("fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType").braced {
+        w.w("fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self").braced {
           w.wl("Self::to_rust(jni_env, j)")
         }
         w.wl
-        w.w("fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject").braced {
+        w.w("fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject").braced {
           w.wl("Self::from_rust(jni_env, r)")
         }
       }
@@ -120,13 +116,12 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
-      val rustModule = idRust.module(ident)
       w.wl("use support_lib::support::JType;")
       w.wl("use support_lib::jni_ffi::{JNIEnv, jobject, jclass};")
-      w.wl(s"use $rustModule;")
       w.wl("use generated_rust_jni;")
 
       if (i.ext.rust) {
+        val rustModule = idRust.module(ident)
         // Generate CEXPORT functions for JNI to call.
         val classIdentMunged = javaMarshal.fqTypename(ident, i)
           .replaceAllLiterally("_", "_1")
@@ -152,7 +147,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
             nativeFn(idJava.method(m.ident), m.params, m.ret, {
               val methodName = idRust.method(m.ident)
               val ret = m.ret.fold("")(r => "let r = ")
-              val call = s"$rustModule::$methodName("
+              val call = s"::$rustModule::$methodName("
               try {
                 writeAlignedCall(w, ret + call, m.params, ")", p => jniMarshal.toRust(p.ty, "j_" + idJava.local(p.ident)))
               } catch {

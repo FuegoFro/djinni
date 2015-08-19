@@ -6,6 +6,8 @@ import djinni.meta._
 
 class JNIMarshal(spec: Spec) extends Marshal(spec) {
 
+  val rustMarshal = new RustMarshal(spec)
+
   // For JNI typename() is always fully qualified and describes the mangled Java type to be used in field/method signatures
   override def typename(tm: MExpr): String = javaTypeSignature(tm)
   def typename(name: String, ty: TypeDef) = s"L${undecoratedTypename(name, ty)};"
@@ -30,12 +32,12 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
   }
 
   def toRust(tm: MExpr, expr: String): String = {
-    s"${rustHelperClass(tm)}::to_rust(jni_env, $expr)"
+    s"${rustMarshal.toRustType(true)(tm)}::to_rust(jni_env, $expr)"
   }
   def toRust(ty: TypeRef, expr: String): String = toRust(ty.resolved, expr)
 
   def fromRust(tm: MExpr, expr: String): String = {
-    s"${rustHelperClass(tm)}::from_rust(jni_env, $expr)"
+    s"${rustMarshal.toRustType(true)(tm)}::from_rust(jni_env, $expr)"
   }
   def fromRust(ty: TypeRef, expr: String): String = fromRust(ty.resolved, expr)
 
@@ -137,44 +139,6 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
         assert(tm.args.size == 2)
         f
       case _ => f
-    }
-  }
-
-  def rustHelperClass(tm: MExpr): String = {
-    rustHelperName(tm) + rustHelperTemplates(tm)
-  }
-
-  private def rustHelperName(tm: MExpr): String = tm.base match {
-    case d: MDef => s"generated_rust_jni::${idRust.module(d.name)}::Native${idRust.ty(d.name)}"
-    case e: MExtern => throw new AssertionError("MExtern not implemented")
-    case o => withRustCrate(Some("support_lib::support"), o match {
-      case p: MPrimitive => p.idlName match {
-        case "i8" => "I8"
-        case "i16" => "I16"
-        case "i32" => "I32"
-        case "i64" => "I64"
-        case "f32" => "F32"
-        case "f64" => "F64"
-        case "bool" => "Bool"
-      }
-      case MOptional => "Optional"
-      case MBinary => "Binary"
-      case MString => "String"
-      case MDate => "Date"
-      case MList => "List"
-      case MSet => "Set"
-      case MMap => "Map"
-      case d: MDef => throw new AssertionError("unreachable")
-      case e: MExtern => throw new AssertionError("unreachable")
-      case p: MParam => throw new AssertionError("not applicable")
-    })
-  }
-
-  private def rustHelperTemplates(tm: MExpr): String = {
-    if (tm.args.isEmpty) {
-      ""
-    } else {
-      tm.args.map(rustHelperClass).mkString("::<", ", ", ">")
     }
   }
 

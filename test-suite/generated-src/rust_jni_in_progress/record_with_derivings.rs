@@ -5,29 +5,26 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::record_with_derivings::RecordWithDerivings;
 
-pub struct NativeRecordWithDerivings;
-impl JType for NativeRecordWithDerivings
+impl JType for ::generated_rust::record_with_derivings::RecordWithDerivings
 {
-    type RustType = RecordWithDerivings;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/RecordWithDerivings");
-        let field_key1 = support_lib::support::get_method(jni_env, class, "mKey1", "I");
-        let field_key2 = support_lib::support::get_method(jni_env, class, "mKey2", "Ljava/lang/String;");
+        let field_key1 = support_lib::support::get_field(jni_env, class, "mKey1", "I");
+        let field_key2 = support_lib::support::get_field(jni_env, class, "mKey2", "Ljava/lang/String;");
 
         assert!(j != 0 as jobject);
-        RecordWithDerivings {
-            key1: support_lib::support::I32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key1)),
-            key2: support_lib::support::String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_key2)),
+        ::generated_rust::record_with_derivings::RecordWithDerivings {
+            key1: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key1)),
+            key2: String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_key2)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/RecordWithDerivings");
@@ -35,15 +32,15 @@ impl JType for NativeRecordWithDerivings
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::I32::from_rust(jni_env, r.key1).for_variadic(),
-                                                      support_lib::support::String::from_rust(jni_env, r.key2).for_variadic()))
+                                                      i32::from_rust(jni_env, r.key1).for_variadic(),
+                                                      String::from_rust(jni_env, r.key2).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }

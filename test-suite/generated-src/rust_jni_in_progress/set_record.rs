@@ -5,29 +5,26 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::set_record::SetRecord;
 
-pub struct NativeSetRecord;
-impl JType for NativeSetRecord
+impl JType for ::generated_rust::set_record::SetRecord
 {
-    type RustType = SetRecord;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/SetRecord");
-        let field_set = support_lib::support::get_method(jni_env, class, "mSet", "Ljava/util/HashSet;");
-        let field_iset = support_lib::support::get_method(jni_env, class, "mIset", "Ljava/util/HashSet;");
+        let field_set = support_lib::support::get_field(jni_env, class, "mSet", "Ljava/util/HashSet;");
+        let field_iset = support_lib::support::get_field(jni_env, class, "mIset", "Ljava/util/HashSet;");
 
         assert!(j != 0 as jobject);
-        SetRecord {
-            set: support_lib::support::Set::<support_lib::support::String>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_set)),
-            iset: support_lib::support::Set::<support_lib::support::I32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_iset)),
+        ::generated_rust::set_record::SetRecord {
+            set: HashSet::<String>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_set)),
+            iset: HashSet::<i32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_iset)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/SetRecord");
@@ -35,15 +32,15 @@ impl JType for NativeSetRecord
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::Set::<support_lib::support::String>::from_rust(jni_env, r.set).for_variadic(),
-                                                      support_lib::support::Set::<support_lib::support::I32>::from_rust(jni_env, r.iset).for_variadic()))
+                                                      HashSet::<String>::from_rust(jni_env, r.set).for_variadic(),
+                                                      HashSet::<i32>::from_rust(jni_env, r.iset).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }

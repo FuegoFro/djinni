@@ -5,29 +5,26 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::record_with_nested_derivings::RecordWithNestedDerivings;
 
-pub struct NativeRecordWithNestedDerivings;
-impl JType for NativeRecordWithNestedDerivings
+impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedDerivings
 {
-    type RustType = RecordWithNestedDerivings;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/RecordWithNestedDerivings");
-        let field_key = support_lib::support::get_method(jni_env, class, "mKey", "I");
-        let field_rec = support_lib::support::get_method(jni_env, class, "mRec", "Lcom/dropbox/djinni/test/RecordWithDerivings;");
+        let field_key = support_lib::support::get_field(jni_env, class, "mKey", "I");
+        let field_rec = support_lib::support::get_field(jni_env, class, "mRec", "Lcom/dropbox/djinni/test/RecordWithDerivings;");
 
         assert!(j != 0 as jobject);
-        RecordWithNestedDerivings {
-            key: support_lib::support::I32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key)),
-            rec: generated_rust_jni::record_with_derivings::NativeRecordWithDerivings::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_rec)),
+        ::generated_rust::record_with_nested_derivings::RecordWithNestedDerivings {
+            key: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key)),
+            rec: RecordWithDerivings::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_rec)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/RecordWithNestedDerivings");
@@ -35,15 +32,15 @@ impl JType for NativeRecordWithNestedDerivings
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::I32::from_rust(jni_env, r.key).for_variadic(),
-                                                      generated_rust_jni::record_with_derivings::NativeRecordWithDerivings::from_rust(jni_env, r.rec).for_variadic()))
+                                                      i32::from_rust(jni_env, r.key).for_variadic(),
+                                                      RecordWithDerivings::from_rust(jni_env, r.rec).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }

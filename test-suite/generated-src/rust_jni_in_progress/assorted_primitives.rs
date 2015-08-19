@@ -5,53 +5,50 @@
 use support_lib;
 use support_lib::support::{JType, ForVaridaic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
-use generated_rust::assorted_primitives::AssortedPrimitives;
 
-pub struct NativeAssortedPrimitives;
-impl JType for NativeAssortedPrimitives
+impl JType for ::generated_rust::assorted_primitives::AssortedPrimitives
 {
-    type RustType = AssortedPrimitives;
     type JniType = jobject;
 
-    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self::RustType {
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
-        let field_b = support_lib::support::get_method(jni_env, class, "mB", "Z");
-        let field_eight = support_lib::support::get_method(jni_env, class, "mEight", "B");
-        let field_sixteen = support_lib::support::get_method(jni_env, class, "mSixteen", "S");
-        let field_thirtytwo = support_lib::support::get_method(jni_env, class, "mThirtytwo", "I");
-        let field_sixtyfour = support_lib::support::get_method(jni_env, class, "mSixtyfour", "J");
-        let field_fthirtytwo = support_lib::support::get_method(jni_env, class, "mFthirtytwo", "F");
-        let field_fsixtyfour = support_lib::support::get_method(jni_env, class, "mFsixtyfour", "D");
-        let field_o_b = support_lib::support::get_method(jni_env, class, "mOB", "Ljava/lang/Boolean;");
-        let field_o_eight = support_lib::support::get_method(jni_env, class, "mOEight", "Ljava/lang/Byte;");
-        let field_o_sixteen = support_lib::support::get_method(jni_env, class, "mOSixteen", "Ljava/lang/Short;");
-        let field_o_thirtytwo = support_lib::support::get_method(jni_env, class, "mOThirtytwo", "Ljava/lang/Integer;");
-        let field_o_sixtyfour = support_lib::support::get_method(jni_env, class, "mOSixtyfour", "Ljava/lang/Long;");
-        let field_o_fthirtytwo = support_lib::support::get_method(jni_env, class, "mOFthirtytwo", "Ljava/lang/Float;");
-        let field_o_fsixtyfour = support_lib::support::get_method(jni_env, class, "mOFsixtyfour", "Ljava/lang/Double;");
+        let field_b = support_lib::support::get_field(jni_env, class, "mB", "Z");
+        let field_eight = support_lib::support::get_field(jni_env, class, "mEight", "B");
+        let field_sixteen = support_lib::support::get_field(jni_env, class, "mSixteen", "S");
+        let field_thirtytwo = support_lib::support::get_field(jni_env, class, "mThirtytwo", "I");
+        let field_sixtyfour = support_lib::support::get_field(jni_env, class, "mSixtyfour", "J");
+        let field_fthirtytwo = support_lib::support::get_field(jni_env, class, "mFthirtytwo", "F");
+        let field_fsixtyfour = support_lib::support::get_field(jni_env, class, "mFsixtyfour", "D");
+        let field_o_b = support_lib::support::get_field(jni_env, class, "mOB", "Ljava/lang/Boolean;");
+        let field_o_eight = support_lib::support::get_field(jni_env, class, "mOEight", "Ljava/lang/Byte;");
+        let field_o_sixteen = support_lib::support::get_field(jni_env, class, "mOSixteen", "Ljava/lang/Short;");
+        let field_o_thirtytwo = support_lib::support::get_field(jni_env, class, "mOThirtytwo", "Ljava/lang/Integer;");
+        let field_o_sixtyfour = support_lib::support::get_field(jni_env, class, "mOSixtyfour", "Ljava/lang/Long;");
+        let field_o_fthirtytwo = support_lib::support::get_field(jni_env, class, "mOFthirtytwo", "Ljava/lang/Float;");
+        let field_o_fsixtyfour = support_lib::support::get_field(jni_env, class, "mOFsixtyfour", "Ljava/lang/Double;");
 
         assert!(j != 0 as jobject);
-        AssortedPrimitives {
-            b: support_lib::support::Bool::to_rust(jni_env, jni_invoke!(jni_env, GetBooleanField, j, field_b)),
-            eight: support_lib::support::I8::to_rust(jni_env, jni_invoke!(jni_env, GetByteField, j, field_eight)),
-            sixteen: support_lib::support::I16::to_rust(jni_env, jni_invoke!(jni_env, GetShortField, j, field_sixteen)),
-            thirtytwo: support_lib::support::I32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_thirtytwo)),
-            sixtyfour: support_lib::support::I64::to_rust(jni_env, jni_invoke!(jni_env, GetLongField, j, field_sixtyfour)),
-            fthirtytwo: support_lib::support::F32::to_rust(jni_env, jni_invoke!(jni_env, GetFloatField, j, field_fthirtytwo)),
-            fsixtyfour: support_lib::support::F64::to_rust(jni_env, jni_invoke!(jni_env, GetDoubleField, j, field_fsixtyfour)),
-            o_b: support_lib::support::Optional::<support_lib::support::Bool>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_b)),
-            o_eight: support_lib::support::Optional::<support_lib::support::I8>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_eight)),
-            o_sixteen: support_lib::support::Optional::<support_lib::support::I16>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_sixteen)),
-            o_thirtytwo: support_lib::support::Optional::<support_lib::support::I32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_thirtytwo)),
-            o_sixtyfour: support_lib::support::Optional::<support_lib::support::I64>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_sixtyfour)),
-            o_fthirtytwo: support_lib::support::Optional::<support_lib::support::F32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_fthirtytwo)),
-            o_fsixtyfour: support_lib::support::Optional::<support_lib::support::F64>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_fsixtyfour)),
+        ::generated_rust::assorted_primitives::AssortedPrimitives {
+            b: bool::to_rust(jni_env, jni_invoke!(jni_env, GetBooleanField, j, field_b)),
+            eight: i8::to_rust(jni_env, jni_invoke!(jni_env, GetByteField, j, field_eight)),
+            sixteen: i16::to_rust(jni_env, jni_invoke!(jni_env, GetShortField, j, field_sixteen)),
+            thirtytwo: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_thirtytwo)),
+            sixtyfour: i64::to_rust(jni_env, jni_invoke!(jni_env, GetLongField, j, field_sixtyfour)),
+            fthirtytwo: f32::to_rust(jni_env, jni_invoke!(jni_env, GetFloatField, j, field_fthirtytwo)),
+            fsixtyfour: f64::to_rust(jni_env, jni_invoke!(jni_env, GetDoubleField, j, field_fsixtyfour)),
+            o_b: Option::<bool>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_b)),
+            o_eight: Option::<i8>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_eight)),
+            o_sixteen: Option::<i16>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_sixteen)),
+            o_thirtytwo: Option::<i32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_thirtytwo)),
+            o_sixtyfour: Option::<i64>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_sixtyfour)),
+            o_fthirtytwo: Option::<f32>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_fthirtytwo)),
+            o_fsixtyfour: Option::<f64>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_o_fsixtyfour)),
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self::RustType) -> Self::JniType {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
@@ -59,27 +56,27 @@ impl JType for NativeAssortedPrimitives
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
-                                                      support_lib::support::Bool::from_rust(jni_env, r.b).for_variadic(),
-                                                      support_lib::support::I8::from_rust(jni_env, r.eight).for_variadic(),
-                                                      support_lib::support::I16::from_rust(jni_env, r.sixteen).for_variadic(),
-                                                      support_lib::support::I32::from_rust(jni_env, r.thirtytwo).for_variadic(),
-                                                      support_lib::support::I64::from_rust(jni_env, r.sixtyfour).for_variadic(),
-                                                      support_lib::support::F32::from_rust(jni_env, r.fthirtytwo).for_variadic(),
-                                                      support_lib::support::F64::from_rust(jni_env, r.fsixtyfour).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::Bool>::from_rust(jni_env, r.o_b).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::I8>::from_rust(jni_env, r.o_eight).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::I16>::from_rust(jni_env, r.o_sixteen).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::I32>::from_rust(jni_env, r.o_thirtytwo).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::I64>::from_rust(jni_env, r.o_sixtyfour).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::F32>::from_rust(jni_env, r.o_fthirtytwo).for_variadic(),
-                                                      support_lib::support::Optional::<support_lib::support::F64>::from_rust(jni_env, r.o_fsixtyfour).for_variadic()))
+                                                      bool::from_rust(jni_env, r.b).for_variadic(),
+                                                      i8::from_rust(jni_env, r.eight).for_variadic(),
+                                                      i16::from_rust(jni_env, r.sixteen).for_variadic(),
+                                                      i32::from_rust(jni_env, r.thirtytwo).for_variadic(),
+                                                      i64::from_rust(jni_env, r.sixtyfour).for_variadic(),
+                                                      f32::from_rust(jni_env, r.fthirtytwo).for_variadic(),
+                                                      f64::from_rust(jni_env, r.fsixtyfour).for_variadic(),
+                                                      Option::<bool>::from_rust(jni_env, r.o_b).for_variadic(),
+                                                      Option::<i8>::from_rust(jni_env, r.o_eight).for_variadic(),
+                                                      Option::<i16>::from_rust(jni_env, r.o_sixteen).for_variadic(),
+                                                      Option::<i32>::from_rust(jni_env, r.o_thirtytwo).for_variadic(),
+                                                      Option::<i64>::from_rust(jni_env, r.o_sixtyfour).for_variadic(),
+                                                      Option::<f32>::from_rust(jni_env, r.o_fthirtytwo).for_variadic(),
+                                                      Option::<f64>::from_rust(jni_env, r.o_fsixtyfour).for_variadic()))
     }
 
-    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self::RustType {
+    fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {
         Self::to_rust(jni_env, j)
     }
 
-    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self::RustType) -> jobject {
+    fn from_rust_boxed(jni_env: *mut JNIEnv, r: Self) -> jobject {
         Self::from_rust(jni_env, r)
     }
 }
