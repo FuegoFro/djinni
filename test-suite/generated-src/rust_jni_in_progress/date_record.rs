@@ -12,8 +12,8 @@ impl JType for ::generated_rust::date_record::DateRecord {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/DateRecord");
-        let field_created_at = support_lib::support::get_field(jni_env, class, "mCreatedAt", "Ljava/util/Date;");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/DateRecord");
+        let field_created_at = ::support_lib::support::get_field(jni_env, class, "mCreatedAt", "Ljava/util/Date;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::date_record::DateRecord {
@@ -24,8 +24,8 @@ impl JType for ::generated_rust::date_record::DateRecord {
     fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/DateRecord");
-        let jconstructor = support_lib::support::get_method(jni_env, class, "<init>", "(Ljava/util/Date;)V");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/DateRecord");
+        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(Ljava/util/Date;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

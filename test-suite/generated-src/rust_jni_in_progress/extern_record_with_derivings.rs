@@ -12,9 +12,9 @@ impl JType for ::generated_rust::extern_record_with_derivings::ExternRecordWithD
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ExternRecordWithDerivings");
-        let field_member = support_lib::support::get_field(jni_env, class, "mMember", "Lcom/dropbox/djinni/test/RecordWithDerivings;");
-        let field_e = support_lib::support::get_field(jni_env, class, "mE", "Lcom/dropbox/djinni/test/Color;");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ExternRecordWithDerivings");
+        let field_member = ::support_lib::support::get_field(jni_env, class, "mMember", "Lcom/dropbox/djinni/test/RecordWithDerivings;");
+        let field_e = ::support_lib::support::get_field(jni_env, class, "mE", "Lcom/dropbox/djinni/test/Color;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::extern_record_with_derivings::ExternRecordWithDerivings {
@@ -26,8 +26,8 @@ impl JType for ::generated_rust::extern_record_with_derivings::ExternRecordWithD
     fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ExternRecordWithDerivings");
-        let jconstructor = support_lib::support::get_method(jni_env, class, "<init>", "(Lcom/dropbox/djinni/test/RecordWithDerivings;Lcom/dropbox/djinni/test/Color;)V");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ExternRecordWithDerivings");
+        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(Lcom/dropbox/djinni/test/RecordWithDerivings;Lcom/dropbox/djinni/test/Color;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

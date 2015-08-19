@@ -12,7 +12,7 @@ impl JType for ::generated_rust::empty_record::EmptyRecord {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/EmptyRecord");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/EmptyRecord");
 
         assert!(j != 0 as jobject);
         ::generated_rust::empty_record::EmptyRecord {
@@ -22,8 +22,8 @@ impl JType for ::generated_rust::empty_record::EmptyRecord {
     fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/EmptyRecord");
-        let jconstructor = support_lib::support::get_method(jni_env, class, "<init>", "()V");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/EmptyRecord");
+        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "()V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor))

@@ -12,8 +12,8 @@ impl JType for ::generated_rust::nested_collection::NestedCollection {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
-        let field_set_list = support_lib::support::get_field(jni_env, class, "mSetList", "Ljava/util/ArrayList;");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
+        let field_set_list = ::support_lib::support::get_field(jni_env, class, "mSetList", "Ljava/util/ArrayList;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::nested_collection::NestedCollection {
@@ -24,8 +24,8 @@ impl JType for ::generated_rust::nested_collection::NestedCollection {
     fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
-        let jconstructor = support_lib::support::get_method(jni_env, class, "<init>", "(Ljava/util/ArrayList;)V");
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NestedCollection");
+        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(Ljava/util/ArrayList;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

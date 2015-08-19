@@ -3,7 +3,7 @@
 
 pub struct RecordWithNestedDerivings {
     pub key: i32,
-    pub rec: RecordWithDerivings,
+    pub rec: ::generated_rust::RecordWithDerivings,
 }
 
 // TODO(rustgen): deriving eq
