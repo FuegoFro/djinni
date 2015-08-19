@@ -31,7 +31,10 @@ struct UserTokenJavaProxy {
 
 impl UserToken for UserTokenJavaProxy {
     fn whoami(&self) -> String {
+        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
+        let jmethod = support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
         // TODO(rustgen): handle local refs correctly
-        let jmethod = jni_invoke!(jni_env, 
+        let jret = (jstring)jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod);
+        String::to_rust(jni_env, jret)
     }
 }

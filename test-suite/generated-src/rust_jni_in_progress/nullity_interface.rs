@@ -30,20 +30,36 @@ struct NullityInterfaceJavaProxy {
 }
 
 impl NullityInterface for NullityInterfaceJavaProxy {
-    fn non_null_parameters(&self, p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterface>>) {
+    fn non_null_parameters(&self, r_p1: Arc<Box<DummyInterface>>, r_p2: Arc<Box<DummyInterface>>) {
+        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NullityInterface");
+        let jmethod = support_lib::support::get_method(jni_env, class, "nonNullParameters", "(Lcom/dropbox/djinni/test/DummyInterface;Lcom/dropbox/djinni/test/DummyInterface;)V");
         // TODO(rustgen): handle local refs correctly
-        let jmethod = jni_invoke!(jni_env, 
+        jni_invoke!(jni_env, CallVoidMethod, self.javaRef, jmethod,
+                    Arc::<Box<DummyInterface>>::from_rust(jni_env, r_p1),
+                    Arc::<Box<DummyInterface>>::from_rust(jni_env, r_p2));
     }
-    fn non_null_return(&self, should_return_null: bool) -> Arc<Box<DummyInterface>> {
+    fn non_null_return(&self, r_should_return_null: bool) -> Arc<Box<DummyInterface>> {
+        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NullityInterface");
+        let jmethod = support_lib::support::get_method(jni_env, class, "nonNullReturn", "(Z)Lcom/dropbox/djinni/test/DummyInterface;");
         // TODO(rustgen): handle local refs correctly
-        let jmethod = jni_invoke!(jni_env, 
+        let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod,
+                    bool::from_rust(jni_env, r_should_return_null));
+        Arc::<Box<DummyInterface>>::to_rust(jni_env, jret)
     }
-    fn nullable_parameters(&self, p1: Option<Arc<Box<DummyInterface>>>, p2: Option<Arc<Box<DummyInterface>>>) {
+    fn nullable_parameters(&self, r_p1: Option<Arc<Box<DummyInterface>>>, r_p2: Option<Arc<Box<DummyInterface>>>) {
+        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NullityInterface");
+        let jmethod = support_lib::support::get_method(jni_env, class, "nullableParameters", "(Lcom/dropbox/djinni/test/DummyInterface;Lcom/dropbox/djinni/test/DummyInterface;)V");
         // TODO(rustgen): handle local refs correctly
-        let jmethod = jni_invoke!(jni_env, 
+        jni_invoke!(jni_env, CallVoidMethod, self.javaRef, jmethod,
+                    Option::<Arc<Box<DummyInterface>>>::from_rust(jni_env, r_p1),
+                    Option::<Arc<Box<DummyInterface>>>::from_rust(jni_env, r_p2));
     }
-    fn nullable_return(&self, should_return_null: bool) -> Option<Arc<Box<DummyInterface>>> {
+    fn nullable_return(&self, r_should_return_null: bool) -> Option<Arc<Box<DummyInterface>>> {
+        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/NullityInterface");
+        let jmethod = support_lib::support::get_method(jni_env, class, "nullableReturn", "(Z)Lcom/dropbox/djinni/test/DummyInterface;");
         // TODO(rustgen): handle local refs correctly
-        let jmethod = jni_invoke!(jni_env, 
+        let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod,
+                    bool::from_rust(jni_env, r_should_return_null));
+        Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, jret)
     }
 }

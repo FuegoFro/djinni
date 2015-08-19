@@ -168,18 +168,35 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         w.w(s"impl $rustTrait for $javaProxy").braced {
           for (m <- i.methods) {
             if (!m.static) {
-              val methodName = idRust.method(m.ident)
+              val rustMethodName = idRust.method(m.ident)
+              val javaMethodName = idJava.method(m.ident)
               try {
-                def paramFormat(param: Field) = idRust.field(param.ident) + ": " + rustMarshal.paramType(param.ty)
+                def paramFormat(param: Field) = "r_" + idRust.field(param.ident) + ": " + rustMarshal.paramType(param.ty)
                 var params = "&self" + preComma(m.params.map(paramFormat).mkString(", "))
                 val returnType = rustMarshal.returnType(m.ret)
-                w.w(s"fn $methodName($params)$returnType").braced {
+                w.w(s"fn $rustMethodName($params)$returnType").braced {
+                  val classLookup = q(jniMarshal.undecoratedTypename(ident, i))
+                  w.wl(s"let class = support_lib::support::get_class(jni_env, $classLookup);")
+                  val methodSig = q(jniMarshal.javaMethodSignature(m.params, m.ret))
+                  w.wl(s"let jmethod = support_lib::support::get_method(jni_env, class, ${q(javaMethodName)}, $methodSig);")
                   w.wl("// TODO(rustgen): handle local refs correctly")
-                  w.wl("let jmethod = jni_invoke!(jni_env, ")
-                  val ret = m.ret.fold("")(r => "let r = ")
+                  val call = m.ret.fold("jni_invoke!(jni_env, CallVoidMethod")(r => "let jret = " + toJniCall(r, (jt: String) => s"jni_invoke!(jni_env, Call${jt}Method"))
+                  w.w(call)
+                  w.w(", self.javaRef, jmethod")
+                  if (m.params.nonEmpty) {
+                    w.wl(",")
+                    writeAlignedCall(w, " " * "jni_invoke!(".length, m.params, ")", p => {
+                      jniMarshal.fromRust(p.ty, "r_" + idRust.field(p.ident))
+                    })
+                  }
+                  else w.w(")")
+                  w.wl(";")
+                  m.ret.fold()(r => {
+                    w.wl(jniMarshal.toRust(r, "jret"))
+                  })
                 }
               } catch {
-                case e: AssertionError => w.wl(s"// would be $methodName, but ${e.getMessage}")
+                case e: AssertionError => w.wl(s"// would be $rustMethodName, but ${e.getMessage}")
               }
             }
           }
