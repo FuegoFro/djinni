@@ -1,4 +1,5 @@
 use std::ffi::CString;
+use std::slice;
 use libc::{c_int, c_uint, c_long, c_double};
 use support_lib::jni_ffi::{
     JavaVM,
@@ -210,8 +211,11 @@ impl<T: JType> JType for Option<T> {
 impl JType for String {
     type JniType = jstring;
 
-    fn to_rust(_jni_env: *mut JNIEnv, _j: jobject) -> Self {
-        "".to_string()
+    fn to_rust(jni_env: *mut JNIEnv, j: jstring) -> Self {
+        let len = jni_invoke!(jni_env, GetStringLength, j) as usize;
+        let jni_chars = jni_invoke!(jni_env, GetStringChars, j, 0 as *mut jboolean);
+        let rust_chars = unsafe { slice::from_raw_parts(jni_chars, len) };
+        String::from_utf16(rust_chars).unwrap()
     }
 
     fn from_rust(_jni_env: *mut JNIEnv, _r: Self) -> jobject {

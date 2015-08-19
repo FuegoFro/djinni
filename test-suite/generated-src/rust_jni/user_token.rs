@@ -1,4 +1,3 @@
-use std::any::Any;
 use std::boxed::Box;
 use std::sync::Arc;
 use support_lib::support::JType;
@@ -14,16 +13,12 @@ impl JType for Arc<Box<UserToken>> {
         }))
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
-        // let any_ref: &Any = r.as_any();
-        // let user_token_ref: &UserToken = &**r;
-        // let any_ref_2 = NativeUserToken::get_proxy_object(user_token_ref);
-        // let foo = match any_ref.downcast_ref::<UserTokenJavaProxy>() {
-        //     Some(..) => 0,
-        //     None => 0,
-        // };
-        // box_ref.downcast();
-        0 as jobject
+    fn from_rust(_jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
+        match r.downcast_ref::<UserTokenJavaProxy>() {
+            Some(user_token_java_proxy) => user_token_java_proxy.java_ref,
+            // Todo - allow interfaces implemented in rust
+            None => panic!(),
+        }
     }
 
     boxed_call_through!();

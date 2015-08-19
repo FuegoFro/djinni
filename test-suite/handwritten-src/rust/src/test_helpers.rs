@@ -8,5 +8,5 @@ pub fn assorted_primitives_id(i: AssortedPrimitives) -> AssortedPrimitives {
 }
 
 pub fn check_token_type(t: Arc<Box<UserToken>>, expected_type: String) -> bool {
-    t.whoami() != expected_type
+    t.whoami() == expected_type
 }
