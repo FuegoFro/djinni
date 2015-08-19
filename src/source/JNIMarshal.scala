@@ -145,7 +145,7 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
   }
 
   private def rustHelperName(tm: MExpr): String = tm.base match {
-    case d: MDef => throw new AssertionError("MDef not implemented")
+    case d: MDef => s"generated_rust_jni::${idRust.module(d.name)}::Native${idRust.ty(d.name)}"
     case e: MExtern => throw new AssertionError("MExtern not implemented")
     case o => withRustCrate(Some("support_lib::support"), o match {
       case p: MPrimitive => p.idlName match {
