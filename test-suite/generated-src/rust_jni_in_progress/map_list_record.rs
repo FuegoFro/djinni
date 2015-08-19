@@ -21,7 +21,7 @@ impl JType for ::generated_rust::map_list_record::MapListRecord {
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/MapListRecord");

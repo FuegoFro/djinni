@@ -12,7 +12,7 @@ impl JType for Arc<Box<ExternInterface2>> {
         Arc::new(Box::new(ExternInterface2JavaProxy { javaRef: j }))
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): this
         0 as jobject
     }

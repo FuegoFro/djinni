@@ -12,7 +12,7 @@ impl JType for Arc<Box<TestDuration>> {
         Arc::new(Box::new(TestDurationJavaProxy { javaRef: j }))
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): this
         0 as jobject
     }

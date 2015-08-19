@@ -25,7 +25,7 @@ impl JType for ::generated_rust::client_returned_record::ClientReturnedRecord {
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ClientReturnedRecord");

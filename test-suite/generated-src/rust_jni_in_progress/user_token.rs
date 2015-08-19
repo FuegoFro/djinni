@@ -12,7 +12,7 @@ impl JType for Arc<Box<UserToken>> {
         Arc::new(Box::new(UserTokenJavaProxy { javaRef: j }))
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): this
         0 as jobject
     }
@@ -32,8 +32,11 @@ struct UserTokenJavaProxy {
 
 impl UserToken for UserTokenJavaProxy {
     fn whoami(&self) -> String {
-        let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
-        let jmethod = support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
+        let jni_env = ::support_lib::support::jni_get_thread_env();
+        // TODO(rustgen): local scope
+        // TODO(rustgen): use helper to cache class object and method IDs
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
+        let jmethod = ::support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
         // TODO(rustgen): handle local refs correctly
         let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod);
         String::to_rust(jni_env, jret)

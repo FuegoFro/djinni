@@ -5,6 +5,42 @@ use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
 
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nonNullParameters(jni_env: *mut JNIEnv, _class: jclass, j_p1: jobject, j_p2: jobject) {
+    let jni_env = ::support_lib::support::jni_get_thread_env();
+    ::static_nullity_interface::non_null_parameters(Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p1),
+                                                    Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p2))
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nonNullReturn(jni_env: *mut JNIEnv, _class: jclass, j_shouldReturnNull: jboolean) -> jobject {
+    let jni_env = ::support_lib::support::jni_get_thread_env();
+    let r = ::static_nullity_interface::non_null_return(bool::to_rust(jni_env, j_shouldReturnNull))
+    Arc::<Box<DummyInterface>>::from_rust(jni_env, r)
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nullableParameters(jni_env: *mut JNIEnv, _class: jclass, j_p1: jobject, j_p2: jobject) {
+    let jni_env = ::support_lib::support::jni_get_thread_env();
+    ::static_nullity_interface::nullable_parameters(Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p1),
+                                                    Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p2))
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nullableReturn(jni_env: *mut JNIEnv, _class: jclass, j_shouldReturnNull: jboolean) -> jobject {
+    let jni_env = ::support_lib::support::jni_get_thread_env();
+    let r = ::static_nullity_interface::nullable_return(bool::to_rust(jni_env, j_shouldReturnNull))
+    Option::<Arc<Box<DummyInterface>>>::from_rust(jni_env, r)
+}
+
 impl JType for Arc<Box<StaticNullityInterface>> {
     type JniType = jobject;
 
@@ -12,7 +48,7 @@ impl JType for Arc<Box<StaticNullityInterface>> {
         Arc::new(Box::new(StaticNullityInterfaceJavaProxy { javaRef: j }))
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
         // TODO(rustgen): this
         0 as jobject
     }
@@ -26,3 +62,6 @@ impl JType for Arc<Box<StaticNullityInterface>> {
     }
 }
 
+struct StaticNullityInterfaceCppProxy {
+    rustRef: Arc<Box<StaticNullityInterface>>
+}
