@@ -33,7 +33,7 @@ test_helpers = interface +c +r {
     static create_cpp_token(): user_token;
     static check_cpp_token(t: user_token);
     static cpp_token_id(t: user_token): i64;
-    static check_token_type(t: user_token, type: string);
+    static check_token_type(t: user_token, expected_type: string): bool;
 
     static return_none(): optional<i32>;
 

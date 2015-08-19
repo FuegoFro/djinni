@@ -210,13 +210,14 @@ CJNIEXPORT jlong JNICALL Java_com_dropbox_djinni_test_TestHelpers_00024CppProxy_
     } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
-CJNIEXPORT void JNICALL Java_com_dropbox_djinni_test_TestHelpers_00024CppProxy_checkTokenType(JNIEnv* jniEnv, jobject /*this*/, jobject j_t, jstring j_type)
+CJNIEXPORT jboolean JNICALL Java_com_dropbox_djinni_test_TestHelpers_00024CppProxy_checkTokenType(JNIEnv* jniEnv, jobject /*this*/, jobject j_t, jstring j_expectedType)
 {
     try {
         DJINNI_FUNCTION_PROLOGUE0(jniEnv);
         ::testsuite::TestHelpers::check_token_type(::djinni_generated::NativeUserToken::toCpp(jniEnv, j_t),
                                                    ::djinni::String::toCpp(jniEnv, j_type));
-    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, )
+        return ::djinni::release(::djinni::Bool::fromCpp(jniEnv, r));
+    } JNI_TRANSLATE_EXCEPTIONS_RETURN(jniEnv, 0 /* value doesn't matter */)
 }
 
 CJNIEXPORT jobject JNICALL Java_com_dropbox_djinni_test_TestHelpers_00024CppProxy_returnNone(JNIEnv* jniEnv, jobject /*this*/)

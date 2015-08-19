@@ -67,8 +67,8 @@
 
 + (int64_t)cppTokenId:(nullable id<DBUserToken>)t;
 
-+ (void)checkTokenType:(nullable id<DBUserToken>)t
-                  type:(nonnull NSString *)type;
++ (BOOL)checkTokenType:(nullable id<DBUserToken>)t
+          expectedType:(nonnull NSString *)expectedType;
 
 + (nullable NSNumber *)returnNone;
 

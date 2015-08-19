@@ -130,10 +130,8 @@ int64_t TestHelpers::cpp_token_id(const std::shared_ptr<UserToken> & in) {
     return reinterpret_cast<int64_t>(in.get());
 }
 
-void TestHelpers::check_token_type(const std::shared_ptr<UserToken> &t, const std::string & type) {
-    if (t->whoami() != type) {
-        throw std::invalid_argument("wrong token type");
-    }
+bool TestHelpers::check_token_type(const std::shared_ptr<UserToken> &t, const std::string & expected_type) {
+    return t->whoami() == expected_type;
 }
 
 std::experimental::optional<int32_t> TestHelpers::return_none() {

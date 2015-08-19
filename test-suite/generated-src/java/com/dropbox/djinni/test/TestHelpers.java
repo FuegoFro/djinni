@@ -231,7 +231,7 @@ public interface TestHelpers {
 
         public static native long cppTokenId(@CheckForNull UserToken t);
 
-        public static native void checkTokenType(@CheckForNull UserToken t, @Nonnull String type);
+        public static native boolean checkTokenType(@CheckForNull UserToken t, @Nonnull String expectedType);
 
         @CheckForNull
         public static native Integer returnNone();

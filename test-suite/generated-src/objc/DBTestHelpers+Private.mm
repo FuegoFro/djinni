@@ -179,11 +179,12 @@ static_assert(__has_feature(objc_arc), "Djinni requires ARC to be enabled for th
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 
-+ (void)checkTokenType:(nullable id<DBUserToken>)t
-                  type:(nonnull NSString *)type {
++ (BOOL)checkTokenType:(nullable id<DBUserToken>)t
+          expectedType:(nonnull NSString *)expectedType {
     try {
         ::testsuite::TestHelpers::check_token_type(::djinni_generated::UserToken::toCpp(t),
                                                    ::djinni::String::toCpp(type));
+        return ::djinni::Bool::fromCpp(r);
     } DJINNI_TRANSLATE_EXCEPTIONS()
 }
 

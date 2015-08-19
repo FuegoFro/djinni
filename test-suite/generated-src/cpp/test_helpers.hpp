@@ -78,7 +78,7 @@ public:
 
     static int64_t cpp_token_id(const std::shared_ptr<UserToken> & t);
 
-    static void check_token_type(const std::shared_ptr<UserToken> & t, const std::string & type);
+    static bool check_token_type(const std::shared_ptr<UserToken> & t, const std::string & expected_type);
 
     static std::experimental::optional<int32_t> return_none();
 

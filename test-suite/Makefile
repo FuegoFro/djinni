@@ -9,7 +9,7 @@ objc: djinni
 	cd objc; xcodebuild -sdk iphonesimulator -project DjinniObjcTest.xcodeproj -scheme DjinniObjcTest test -destination 'platform=iOS Simulator,name=iPhone 7,OS=latest'
 
 java: djinni
-	cd java && ant compile test
+	cd java && ant compile testCpp
 
 linux_docker: djinni
 	cd ..; ./test-suite/java/docker/run_dockerized_test.sh
