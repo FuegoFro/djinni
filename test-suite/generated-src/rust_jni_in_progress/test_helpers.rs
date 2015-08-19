@@ -105,16 +105,14 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkMapListRecord(jn
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkClientInterfaceAscii(jni_env: *mut JNIEnv, _class: jclass, j_i: jobject) {
-    ::test_helpers::check_client_interface_ascii(// tried to call through to static method check_client_interface_ascii, but DInterface not implemented
-
+    ::test_helpers::check_client_interface_ascii(Arc::<Box<ClientInterface>>::to_rust(jni_env, j_i))
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkClientInterfaceNonascii(jni_env: *mut JNIEnv, _class: jclass, j_i: jobject) {
-    ::test_helpers::check_client_interface_nonascii(// tried to call through to static method check_client_interface_nonascii, but DInterface not implemented
-
+    ::test_helpers::check_client_interface_nonascii(Arc::<Box<ClientInterface>>::to_rust(jni_env, j_i))
 }
 
 #[no_mangle]
@@ -135,9 +133,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkEnum(jni_env: *m
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_tokenId(jni_env: *mut JNIEnv, _class: jclass, j_t: jobject) -> jobject {
-    let r = ::test_helpers::token_id(// tried to call through to static method token_id, but DInterface not implemented
-
-    // tried return from static method token_id, but DInterface not implemented
+    let r = ::test_helpers::token_id(Option::<Arc<Box<UserToken>>>::to_rust(jni_env, j_t))
+    Option::<Arc<Box<UserToken>>>::from_rust(jni_env, r)
 }
 
 #[no_mangle]
@@ -145,23 +142,21 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_tokenId(jni_env: *mut
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_createCppToken(jni_env: *mut JNIEnv, _class: jclass) -> jobject {
     let r = ::test_helpers::create_cpp_token()
-    // tried return from static method create_cpp_token, but DInterface not implemented
+    Arc::<Box<UserToken>>::from_rust(jni_env, r)
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkCppToken(jni_env: *mut JNIEnv, _class: jclass, j_t: jobject) {
-    ::test_helpers::check_cpp_token(// tried to call through to static method check_cpp_token, but DInterface not implemented
-
+    ::test_helpers::check_cpp_token(Arc::<Box<UserToken>>::to_rust(jni_env, j_t))
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_cppTokenId(jni_env: *mut JNIEnv, _class: jclass, j_t: jobject) -> jlong {
-    let r = ::test_helpers::cpp_token_id(// tried to call through to static method cpp_token_id, but DInterface not implemented
-
+    let r = ::test_helpers::cpp_token_id(Arc::<Box<UserToken>>::to_rust(jni_env, j_t))
     i64::from_rust(jni_env, r)
 }
 
@@ -169,8 +164,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_cppTokenId(jni_env: *
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkTokenType(jni_env: *mut JNIEnv, _class: jclass, j_t: jobject, j_expectedType: jstring) -> jboolean {
-    let r = ::test_helpers::check_token_type(// tried to call through to static method check_token_type, but DInterface not implemented
-
+    let r = ::test_helpers::check_token_type(Arc::<Box<UserToken>>::to_rust(jni_env, j_t),
+                                             String::to_rust(jni_env, j_expectedType))
     bool::from_rust(jni_env, r)
 }
 
@@ -203,21 +198,19 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_idBinary(jni_env: *mu
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_getNullityInterface(jni_env: *mut JNIEnv, _class: jclass) -> jobject {
     let r = ::test_helpers::get_nullity_interface()
-    // tried return from static method get_nullity_interface, but DInterface not implemented
+    Arc::<Box<NullityInterface>>::from_rust(jni_env, r)
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkInterfaceNullityParameters(jni_env: *mut JNIEnv, _class: jclass, j_i: jobject) {
-    ::test_helpers::check_interface_nullity_parameters(// tried to call through to static method check_interface_nullity_parameters, but DInterface not implemented
-
+    ::test_helpers::check_interface_nullity_parameters(Arc::<Box<NullityInterface>>::to_rust(jni_env, j_i))
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkInterfaceNullityReturn(jni_env: *mut JNIEnv, _class: jclass, j_i: jobject) {
-    ::test_helpers::check_interface_nullity_return(// tried to call through to static method check_interface_nullity_return, but DInterface not implemented
-
+    ::test_helpers::check_interface_nullity_return(Arc::<Box<NullityInterface>>::to_rust(jni_env, j_i))
 }

@@ -5,3 +5,7 @@ pub struct RecordWithNestedDerivings {
     pub key: i32,
     pub rec: RecordWithDerivings,
 }
+
+// TODO(rustgen): deriving eq
+
+// TODO(rustgen): deriving ord

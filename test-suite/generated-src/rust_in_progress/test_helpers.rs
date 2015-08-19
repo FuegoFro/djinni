@@ -14,19 +14,19 @@ pub trait TestHelpers {
     fn check_empty_map(m: HashMap<String, i64>) -> bool;
     fn get_map_list_record() -> MapListRecord;
     fn check_map_list_record(m: MapListRecord) -> bool;
-    // would be check_client_interface_ascii, but DInterface not implemented
-    // would be check_client_interface_nonascii, but DInterface not implemented
+    fn check_client_interface_ascii(i: Arc<Box<ClientInterface>>);
+    fn check_client_interface_nonascii(i: Arc<Box<ClientInterface>>);
     fn check_enum_map(m: HashMap<Color, String>);
     fn check_enum(c: Color);
-    // would be token_id, but DInterface not implemented
-    // would be create_cpp_token, but DInterface not implemented
-    // would be check_cpp_token, but DInterface not implemented
-    // would be cpp_token_id, but DInterface not implemented
-    // would be check_token_type, but DInterface not implemented
+    fn token_id(t: Option<Arc<Box<UserToken>>>) -> Option<Arc<Box<UserToken>>>;
+    fn create_cpp_token() -> Arc<Box<UserToken>>;
+    fn check_cpp_token(t: Arc<Box<UserToken>>);
+    fn cpp_token_id(t: Arc<Box<UserToken>>) -> i64;
+    fn check_token_type(t: Arc<Box<UserToken>>, expected_type: String) -> bool;
     fn return_none() -> Option<i32>;
     fn assorted_primitives_id(i: AssortedPrimitives) -> AssortedPrimitives;
     fn id_binary(b: Box<[u8]>) -> Box<[u8]>;
-    // would be get_nullity_interface, but DInterface not implemented
-    // would be check_interface_nullity_parameters, but DInterface not implemented
-    // would be check_interface_nullity_return, but DInterface not implemented
+    fn get_nullity_interface() -> Arc<Box<NullityInterface>>;
+    fn check_interface_nullity_parameters(i: Arc<Box<NullityInterface>>);
+    fn check_interface_nullity_return(i: Arc<Box<NullityInterface>>);
 }

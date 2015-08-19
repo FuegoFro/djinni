@@ -3,5 +3,5 @@
 
 pub trait CppException {
     fn throw_an_exception(&self) -> i32;
-    // would be get, but DInterface not implemented
+    fn get() -> Arc<Box<CppException>>;
 }

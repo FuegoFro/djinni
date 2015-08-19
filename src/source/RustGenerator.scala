@@ -1,5 +1,6 @@
 package djinni
 
+import djinni.ast.Record.DerivingType
 import djinni.ast._
 import djinni.generatorTools._
 import djinni.writer.IndentWriter
@@ -36,6 +37,14 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
             case e: AssertionError => w.wl(s"// would be $fieldName, but " + e.getMessage)
           }
         }
+      }
+      if (r.derivingTypes.contains(DerivingType.Eq)) {
+        w.wl
+        w.wl("// TODO(rustgen): deriving eq")
+      }
+      if (r.derivingTypes.contains(DerivingType.Ord)) {
+        w.wl
+        w.wl("// TODO(rustgen): deriving ord")
       }
     })
   }

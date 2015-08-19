@@ -17,3 +17,5 @@ pub struct AssortedPrimitives {
     pub o_fthirtytwo: Option<f32>,
     pub o_fsixtyfour: Option<f64>,
 }
+
+// TODO(rustgen): deriving eq

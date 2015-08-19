@@ -5,3 +5,7 @@ pub struct RecordWithDerivings {
     pub key1: i32,
     pub key2: String,
 }
+
+// TODO(rustgen): deriving eq
+
+// TODO(rustgen): deriving ord
