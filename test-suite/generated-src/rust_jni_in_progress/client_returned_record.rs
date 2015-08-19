@@ -20,8 +20,8 @@ impl JType for ::generated_rust::client_returned_record::ClientReturnedRecord {
         assert!(j != 0 as jobject);
         ::generated_rust::client_returned_record::ClientReturnedRecord {
             record_id: i64::to_rust(jni_env, jni_invoke!(jni_env, GetLongField, j, field_record_id)),
-            content: String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_content)),
-            misc: Option::<String>::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_misc)),
+            content: String::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_content)),
+            misc: Option::<String>::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_misc)),
         }
     }
 

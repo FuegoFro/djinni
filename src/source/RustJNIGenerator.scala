@@ -106,31 +106,37 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       w.wl("use support_lib::jni_ffi::{JNIEnv, jobject, jclass};")
       w.wl("use generated_rust_jni;")
 
-      if (i.ext.rust) {
-        val rustModule = idRust.module(ident)
-        // Generate CEXPORT functions for JNI to call.
-        val classIdentMunged = javaMarshal.fqTypename(ident, i)
-          .replaceAllLiterally("_", "_1")
-          .replaceAllLiterally(".", "_")
-        val prefix = "Java_" + classIdentMunged
-        def nativeFn(name: String, params: Iterable[Field], ret: Option[TypeRef], f: => Unit) = {
-          w.wl
-          w.wl("#[no_mangle]")
-          w.wl("#[inline(never)]")
-          w.wl("#[allow(non_snake_case)]")
+      val rustModule = idRust.module(ident)
+      // Generate CEXPORT functions for JNI to call.
+      val classIdentMunged = javaMarshal.fqTypename(ident, i)
+        .replaceAllLiterally("_", "_1")
+        .replaceAllLiterally(".", "_")
+      val prefix = "Java_" + classIdentMunged
+      def nativeFn(name: String, static: Boolean, params: Iterable[Field], ret: Option[TypeRef], f: => Unit) = {
+        w.wl
+        w.wl("#[no_mangle]")
+        w.wl("#[inline(never)]")
+        w.wl("#[allow(non_snake_case)]")
 
-          val paramList = params.map(p => "j_" + idJava.local(p.ident) + ": " + jniMarshal.paramType(p.ty)).mkString(", ")
-          val jniRetType = ret.fold("")(r => " -> " + jniMarshal.fqReturnType(Some(r)))
-          val methodNameMunged = name.replaceAllLiterally("_", "_1")
-          w.w( s"""pub extern "C" fn ${prefix}_$methodNameMunged(jni_env: *mut JNIEnv, _class: jclass${preComma(paramList)})$jniRetType""").braced {
+        val paramList = params.map(p => "j_" + idJava.local(p.ident) + ": " + jniMarshal.paramType(p.ty)).mkString(", ")
+        val jniRetType = ret.fold("")(r => " -> " + jniMarshal.fqReturnType(Some(r)))
+        val methodNameMunged = name.replaceAllLiterally("_", "_1")
+        if (static) {
+          w.w(s"""pub extern "C" fn ${prefix}_$methodNameMunged(jni_env: *mut JNIEnv, _class: jclass${preComma(paramList)})$jniRetType""").braced {
+            f
+          }
+        } else {
+          w.w(s"""pub extern "C" fn ${prefix}_00024CppProxy_$methodNameMunged(jni_env: *mut JNIEnv, _: jobject, nativeRef: jlong${preComma(paramList)})""").braced {
             f
           }
         }
+      }
 
+      if (i.ext.rust) {
         // Put all static methods first, outside of the trait.
         for (m <- i.methods) {
           if (m.static) {
-            nativeFn(idJava.method(m.ident), m.params, m.ret, {
+            nativeFn(idJava.method(m.ident), true, m.params, m.ret, {
               val methodName = idRust.method(m.ident)
               val ret = m.ret.fold("")(r => "let r = ")
               val call = s"::$rustModule::$methodName("
@@ -150,9 +156,11 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         }
       }
 
+      w.wl
       val rustTrait = idRust.ty(ident)
       val boxedRustType = rustMarshal.interfaceName(ident)
       val javaProxy = rustTrait + "JavaProxy"
+      val rustProxy = rustTrait + "CppProxy" // Named like this because that's the native-backed Java class we generate right now
       jTypeImpl(boxedRustType, w, toRust = (w: IndentWriter) => {
         w.wl(s"Arc::new(Box::new($javaProxy { javaRef: j }))")
       }, fromRust = (w: IndentWriter) => {
@@ -202,6 +210,35 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
           }
         }
       }
+
+      if (i.ext.rust) {
+        w.w(s"struct $rustProxy").braced {
+          w.wl(s"rustRef: $boxedRustType")
+        }
+        for (m <- i.methods) {
+          if (!m.static) {
+            try {
+              nativeFn(idJava.method(m.ident), false, m.params, m.ret, {
+                w.wl(s"let ref = support_lib::support::CppProxyHandle::<$rustTrait>::get(nativeRef);")
+                val methodName = idRust.method(m.ident)
+                val ret = m.ret.fold("")(r => "let r = ")
+                val call = s"ref.$methodName("
+                try {
+                  writeAlignedCall(w, ret + call, m.params, ")", p => jniMarshal.toRust(p.ty, "j_" + idJava.local(p.ident)))
+                } catch {
+                  case e: AssertionError => w.wl(s"// tried to call through to method ${m.ident.name}, but ${e.getMessage}")
+                }
+                w.wl
+                try {
+                  m.ret.fold()(r => w.wl(jniMarshal.fromRust(r, "r")))
+                } catch {
+                  case e: AssertionError => w.wl(s"// tried return from method ${m.ident.name}, but ${e.getMessage}")
+                }
+              })
+            }
+          }
+        }
+      }
     })
   }
 
@@ -230,9 +267,9 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
   def toJniCall(ty: TypeRef, f: String => String): String = toJniCall(ty.resolved, f, false)
   def toJniCall(m: MExpr, f: String => String, needRef: Boolean): String = m.base match {
     case p: MPrimitive => f(if (needRef) "Object" else IdentStyle.camelUpper(p.jName))
-    case MString => "(jstring)" + f("Object")
+    case MString => f("Object")// + " as jstring"
     case MOptional => toJniCall(m.args.head, f, true)
-    case MBinary => "(jbyteArray)" + f("Object")
+    case MBinary => f("Object")// + " as jbyteArray"
     case _ => f("Object")
   }
 }

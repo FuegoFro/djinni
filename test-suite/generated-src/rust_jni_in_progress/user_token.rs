@@ -4,6 +4,7 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+
 impl JType for Arc<Box<UserToken>> {
     type JniType = jobject;
 
@@ -34,7 +35,7 @@ impl UserToken for UserTokenJavaProxy {
         let class = support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
         let jmethod = support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
         // TODO(rustgen): handle local refs correctly
-        let jret = (jstring)jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod);
+        let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod);
         String::to_rust(jni_env, jret)
     }
 }

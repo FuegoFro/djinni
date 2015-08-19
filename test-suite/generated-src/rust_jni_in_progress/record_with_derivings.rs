@@ -19,7 +19,7 @@ impl JType for ::generated_rust::record_with_derivings::RecordWithDerivings {
         assert!(j != 0 as jobject);
         ::generated_rust::record_with_derivings::RecordWithDerivings {
             key1: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key1)),
-            key2: String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_key2)),
+            key2: String::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_key2)),
         }
     }
 

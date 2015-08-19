@@ -4,6 +4,7 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+
 impl JType for Arc<Box<NullityInterface>> {
     type JniType = jobject;
 
@@ -62,4 +63,43 @@ impl NullityInterface for NullityInterfaceJavaProxy {
                     bool::from_rust(jni_env, r_should_return_null));
         Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, jret)
     }
+}
+struct NullityInterfaceCppProxy {
+    rustRef: Arc<Box<NullityInterface>>
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_nonNullParameters(jni_env: *mut JNIEnv, _: jobject, nativeRef: jlong, j_p1: jobject, j_p2: jobject) {
+    let ref = support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
+    ref.non_null_parameters(Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p1),
+                            Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p2))
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_nonNullReturn(jni_env: *mut JNIEnv, _: jobject, nativeRef: jlong, j_shouldReturnNull: jboolean) {
+    let ref = support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
+    let r = ref.non_null_return(bool::to_rust(jni_env, j_shouldReturnNull))
+    Arc::<Box<DummyInterface>>::from_rust(jni_env, r)
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_nullableParameters(jni_env: *mut JNIEnv, _: jobject, nativeRef: jlong, j_p1: jobject, j_p2: jobject) {
+    let ref = support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
+    ref.nullable_parameters(Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p1),
+                            Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p2))
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_nullableReturn(jni_env: *mut JNIEnv, _: jobject, nativeRef: jlong, j_shouldReturnNull: jboolean) {
+    let ref = support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
+    let r = ref.nullable_return(bool::to_rust(jni_env, j_shouldReturnNull))
+    Option::<Arc<Box<DummyInterface>>>::from_rust(jni_env, r)
 }

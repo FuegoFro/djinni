@@ -4,6 +4,7 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+
 impl JType for Arc<Box<StaticNullityInterface>> {
     type JniType = jobject;
 

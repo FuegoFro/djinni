@@ -19,7 +19,7 @@ impl JType for ::generated_rust::constants::Constants {
         assert!(j != 0 as jobject);
         ::generated_rust::constants::Constants {
             some_integer: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_some_integer)),
-            some_string: String::to_rust(jni_env, (jstring)jni_invoke!(jni_env, GetObjectField, j, field_some_string)),
+            some_string: String::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_some_string)),
         }
     }
 

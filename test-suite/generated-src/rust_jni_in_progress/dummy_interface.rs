@@ -4,6 +4,7 @@
 use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
+
 impl JType for Arc<Box<DummyInterface>> {
     type JniType = jobject;
 
@@ -30,4 +31,7 @@ struct DummyInterfaceJavaProxy {
 }
 
 impl DummyInterface for DummyInterfaceJavaProxy {
+}
+struct DummyInterfaceCppProxy {
+    rustRef: Arc<Box<DummyInterface>>
 }
