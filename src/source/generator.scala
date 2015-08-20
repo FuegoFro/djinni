@@ -245,14 +245,18 @@ package object generatorTools {
         if (!spec.skipGeneration) {
           createFolder("Rust", spec.rustOutFolder.get)
         }
-        new RustGenerator(spec).generate(idl)
+        val rustGen = new RustGenerator(spec)
+        rustGen.generate(idl)
+        rustGen.generateModule(idl)
       }
       if (spec.rustJniOutFolder.isDefined) {
         DEBUG(spec.rustJniOutFolder.get.toString)
         if (!spec.skipGeneration) {
           createFolder("Rust", spec.rustJniOutFolder.get)
         }
-        new RustJNIGenerator(spec).generate(idl)
+        val rustJNIGen = new RustJNIGenerator(spec)
+        rustJNIGen.generate(idl)
+        rustJNIGen.generateModule(idl)
       }
       None
     }

@@ -3,7 +3,7 @@
 
 #[macro_use(jni_invoke)]
 use support_lib;
-use support_lib::support::{JType, ForVaridaic};
+use support_lib::support::{JType, ForVariadic};
 use support_lib::jni_ffi::{JNIEnv, jobject};
 
 impl JType for ::generated_rust::extern_record_with_derivings::ExternRecordWithDerivings {

@@ -15,6 +15,14 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustJniOutFolder.get)(name, origin, f)
 
+  def generateModule(idl: Seq[TypeDecl]): Unit = {
+    createFile(spec.rustJniOutFolder.get, "mod.rs", (w: IndentWriter) => {
+      for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
+        w.wl(s"pub mod ${idRust.module(td.ident)};")
+      }
+    })
+  }
+
   class RustJNIRefs(name: String) {
     var ffi = mutable.TreeSet[String]()
     var refs = mutable.TreeSet[String]()
@@ -42,7 +50,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
       w.wl("#[macro_use(jni_invoke)]")
       w.wl("use support_lib;")
-      w.wl("use support_lib::support::{JType, ForVaridaic};")
+      w.wl("use support_lib::support::{JType, ForVariadic};")
       w.wl("use support_lib::jni_ffi::{JNIEnv, jobject};") // This list shouldn't be hardcoded
       w.wl
       jTypeImpl(fqRustName, w, toRust = (w: IndentWriter) => {

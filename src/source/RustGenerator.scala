@@ -11,6 +11,14 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
 
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustOutFolder.get)(name, origin, f)
 
+  def generateModule(idl: Seq[TypeDecl]): Unit = {
+    createFile(spec.rustOutFolder.get, "mod.rs", (w: IndentWriter) => {
+      for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
+        w.wl(s"pub mod ${idRust.module(td.ident)};")
+      }
+    })
+  }
+
   override def generateEnum(origin: String, ident: Ident, doc: Doc, e: Enum) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val rustName = idRust.ty(ident)

@@ -380,6 +380,7 @@ djinni-output-temp/rust/nested_collection.rs
 djinni-output-temp/rust/record_with_derivings.rs
 djinni-output-temp/rust/record_with_nested_derivings.rs
 djinni-output-temp/rust/set_record.rs
+djinni-output-temp/rust/mod.rs
 djinni-output-temp/rust_jni/test_duration.rs
 djinni-output-temp/rust_jni/record_with_duration_and_derivings.rs
 djinni-output-temp/rust_jni/date_record.rs
@@ -404,3 +405,4 @@ djinni-output-temp/rust_jni/nested_collection.rs
 djinni-output-temp/rust_jni/record_with_derivings.rs
 djinni-output-temp/rust_jni/record_with_nested_derivings.rs
 djinni-output-temp/rust_jni/set_record.rs
+djinni-output-temp/rust_jni/mod.rs
