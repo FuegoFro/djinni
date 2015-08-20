@@ -233,8 +233,13 @@ impl JType for String {
 }
 
 /*
- * Helpers for converting strings between UTF8 and UTF16
+ * Used to help proxy calls from Java to Rust-implemented interfaces
  */
+
+pub trait RustProxyable {
+    fn to_handle(self) -> jlong;
+    fn from_handle(rust_proxy_handle: jlong) -> Box<Self>;
+}
 
 /*
  * Help translate the jni types to sizes that are
