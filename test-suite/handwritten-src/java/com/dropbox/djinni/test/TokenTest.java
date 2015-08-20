@@ -32,9 +32,10 @@ public class TokenTest extends TestCase {
 
     public void testTokenType() {
         assertTrue("1", TestHelpers.checkTokenType(new JavaToken(), "Java"));
-        assertTrue("2", TestHelpers.checkTokenType(TestHelpers.createCppToken(), "C++"));
-        assertFalse("3", TestHelpers.checkTokenType(new JavaToken(), "foo"));
-        assertFalse("4", TestHelpers.checkTokenType(TestHelpers.createCppToken(), "foo"));
+        assertEquals("2", TestHelpers.createCppToken().whoami(), "C++");
+        assertTrue("3", TestHelpers.checkTokenType(TestHelpers.createCppToken(), "C++"));
+        assertFalse("4", TestHelpers.checkTokenType(new JavaToken(), "foo"));
+        assertFalse("5", TestHelpers.checkTokenType(TestHelpers.createCppToken(), "foo"));
     }
 
     public void testNotCppToken() {

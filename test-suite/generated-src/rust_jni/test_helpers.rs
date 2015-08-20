@@ -21,3 +21,11 @@ pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_checkTokenType(jni_en
                                              String::to_rust(jni_env, j_type));
     bool::from_rust(jni_env, ret)
 }
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_TestHelpers_createCppToken(jni_env: *mut JNIEnv, _class: jclass) -> jobject {
+    let ret = test_helpers::create_cpp_token();
+    Arc::<Box<generated_rust::user_token::UserToken>>::from_rust(jni_env, ret)
+}
