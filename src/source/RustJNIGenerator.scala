@@ -48,6 +48,8 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val fqRustName = s"::generated_rust::${idRust.module(ident)}::${idRust.ty(ident)}"
 
+      if (r.fields.map(f => f.ty.resolved).collect { case e: MExtern => e }.nonEmpty) return
+
       w.wl("#[macro_use(jni_invoke)]")
       w.wl("use support_lib;")
       w.wl("use support_lib::support::{JType, ForVariadic};")

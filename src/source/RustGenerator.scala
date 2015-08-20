@@ -33,26 +33,36 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
+      var hasField = false
       val rustName = idRust.ty(ident)
-      w.w(s"pub struct $rustName").braced {
-        for (f <- r.fields) {
-          // TODO(rustgen): write documentation
-          val fieldName = idRust.field(f.ident)
-          try {
-            val fieldType = marshal.fieldType(f.ty)
-            w.wl(s"pub $fieldName: $fieldType,")
-          } catch {
-            case e: AssertionError => w.wl(s"// would be $fieldName, but " + e.getMessage)
+      w.w(s"pub struct $rustName")
+      if (r.fields.isEmpty) {
+        w.wl(";")
+      } else {
+        w.braced {
+          for (f <- r.fields) {
+            // TODO(rustgen): write documentation
+            val fieldName = idRust.field(f.ident)
+            try {
+              val fieldType = marshal.fieldType(f.ty)
+              w.wl(s"pub $fieldName: $fieldType,")
+              hasField = true
+            } catch {
+              case e: AssertionError => w.wl(s"// would be $fieldName, but " + e.getMessage)
+            }
+          }
+          if (!hasField) {
+            w.wl("dummy: u8")
           }
         }
-      }
-      if (r.derivingTypes.contains(DerivingType.Eq)) {
-        w.wl
-        w.wl("// TODO(rustgen): deriving eq")
-      }
-      if (r.derivingTypes.contains(DerivingType.Ord)) {
-        w.wl
-        w.wl("// TODO(rustgen): deriving ord")
+        if (r.derivingTypes.contains(DerivingType.Eq)) {
+          w.wl
+          w.wl("// TODO(rustgen): deriving eq")
+        }
+        if (r.derivingTypes.contains(DerivingType.Ord)) {
+          w.wl
+          w.wl("// TODO(rustgen): deriving ord")
+        }
       }
     })
   }

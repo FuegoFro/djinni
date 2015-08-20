@@ -3,6 +3,7 @@
 
 pub struct DateRecord {
     // would be created_at, but MExtern not implemented
+    dummy: u8
 }
 
 // TODO(rustgen): deriving eq

@@ -3,4 +3,5 @@
 
 pub struct MapDateRecord {
     // would be dates_by_id, but MExtern not implemented
+    dummy: u8
 }

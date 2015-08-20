@@ -4,6 +4,7 @@
 pub struct ExternRecordWithDerivings {
     // would be member, but MExtern not implemented
     // would be e, but MExtern not implemented
+    dummy: u8
 }
 
 // TODO(rustgen): deriving eq

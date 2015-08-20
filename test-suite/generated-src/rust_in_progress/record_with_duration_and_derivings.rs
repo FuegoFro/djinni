@@ -3,6 +3,7 @@
 
 pub struct RecordWithDurationAndDerivings {
     // would be dt, but MExtern not implemented
+    dummy: u8
 }
 
 // TODO(rustgen): deriving eq
