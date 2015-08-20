@@ -10,3 +10,4 @@ crate_type = ["dylib"]
 [dependencies]
 libc = "0.1.0"
 mopa = "0.2.0"
+encoding = "0.2.0"

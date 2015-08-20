@@ -1,6 +1,7 @@
 extern crate libc;
 #[macro_use(mopafy)]
 extern crate mopa;
+extern crate encoding;
 
 #[macro_use]
 pub mod support_lib;

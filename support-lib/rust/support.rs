@@ -1,5 +1,7 @@
 use std::ffi::CString;
 use std::slice;
+use encoding::all::UTF_16LE;
+use encoding::{Encoding, EncoderTrap};
 use libc::{c_int, c_uint, c_long, c_double};
 use support_lib::jni_ffi::{
     JavaVM,
@@ -16,6 +18,7 @@ use support_lib::jni_ffi::{
     jdouble,
     jobject,
     jstring,
+    jchar,
     JNI_VERSION_1_6,
 };
 
@@ -218,8 +221,12 @@ impl JType for String {
         String::from_utf16(rust_chars).unwrap()
     }
 
-    fn from_rust(_jni_env: *mut JNIEnv, _r: Self) -> jobject {
-        0 as jobject
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        let bytes = UTF_16LE.encode(&r, EncoderTrap::Strict).unwrap();
+        assert!(bytes.len() % 2 == 0);
+        let string_length = bytes.len() / 2;
+        let chars_for_java: &[u16] = unsafe { slice::from_raw_parts(bytes.as_ptr() as *const _, string_length) };
+        jni_invoke!(jni_env, NewString, chars_for_java.as_ptr() as *const jchar, string_length as i32)
     }
 
     boxed_call_through!();
