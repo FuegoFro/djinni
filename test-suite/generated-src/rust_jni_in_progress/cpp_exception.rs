@@ -7,7 +7,7 @@ use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
 
-impl JType for Arc<Box<::generated_rust::CppException>> {
+impl JType for Arc<Box<::generated_rust::cpp_exception::CppException>> {
     type JniType = jobject;
 
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {

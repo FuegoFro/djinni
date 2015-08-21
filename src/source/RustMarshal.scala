@@ -40,8 +40,8 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
           case MMap => "HashMap"
           case d: MDef =>
             d.defType match {
-              case DEnum => "::generated_rust::" + idRust.ty(d.name)
-              case DRecord => "::generated_rust::" + idRust.ty(d.name)
+              case DEnum => "::generated_rust::" + idRust.module(d.name) + "::" + idRust.ty(d.name)
+              case DRecord => "::generated_rust::" + idRust.module(d.name) + "::" + idRust.ty(d.name)
               case DInterface => interfaceName(d.name, scoped)
             }
           case e: MExtern => throw new AssertionError("extern should have been special cased")
@@ -53,6 +53,6 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
   def toRustType(tm: MExpr): String = toRustType(false)(tm)
 
   def interfaceName(name: String, scoped: Boolean = false): String =
-    s"Arc${if(scoped)"::" else ""}<Box<::generated_rust::${idRust.ty(name)}>>"
+    s"Arc${if(scoped)"::" else ""}<Box<::generated_rust::${idRust.module(name)}::${idRust.ty(name)}>>"
 
 }

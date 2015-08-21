@@ -3,5 +3,5 @@
 
 pub trait CppException {
     fn throw_an_exception(&self) -> i32;
-    fn get() -> Arc<Box<::generated_rust::CppException>>;
+    fn get() -> Arc<Box<::generated_rust::cpp_exception::CppException>>;
 }

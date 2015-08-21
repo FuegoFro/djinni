@@ -71,6 +71,9 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   }
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
+    if (rustSkipGeneration(i)) {
+      return
+    }
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val rustName = idRust.ty(ident)
       // TODO(rustgen): imports

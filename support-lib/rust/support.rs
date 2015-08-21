@@ -221,12 +221,44 @@ impl JType for String {
         String::from_utf16(rust_chars).unwrap()
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> jobject {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> jstring {
         let bytes = UTF_16LE.encode(&r, EncoderTrap::Strict).unwrap();
         assert!(bytes.len() % 2 == 0);
         let string_length = bytes.len() / 2;
         let chars_for_java: &[u16] = unsafe { slice::from_raw_parts(bytes.as_ptr() as *const _, string_length) };
         jni_invoke!(jni_env, NewString, chars_for_java.as_ptr() as *const jchar, string_length as i32)
+    }
+
+    boxed_call_through!();
+}
+
+impl<T: JType> JType for Vec<T> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: jobject) -> Self {
+        let class = get_class(jni_env, "java/util/ArrayList");
+        let method_size = get_method(jni_env, class, "size", "()I");
+        let method_get = get_method(jni_env, class, "get", "(I)Ljava/lang/Object;");
+        let list_size = jni_invoke!(jni_env, CallIntMethod, j, method_size) as usize;
+        let mut r = Vec::with_capacity(list_size);
+        for i in 0..list_size {
+            let elt: jobject = jni_invoke!(jni_env, CallObjectMethod, j, method_get, i as jint);
+            r.push(T::to_rust_boxed(jni_env, elt));
+        }
+        r
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> jobject {
+        let class = get_class(jni_env, "java/util/ArrayList");
+        let jconstructor = get_method(jni_env, class, "<init>", "(I)V");
+        let method_add = get_method(jni_env, class, "add", "(Ljava/lang/Object;)Z");
+        let j: jobject = jni_invoke!(jni_env, NewLocalRef, jni_invoke!(
+            jni_env, NewObject, class, jconstructor, r.len() as jint));
+        for elt in r {
+            let jelt = T::from_rust_boxed(jni_env, elt);
+            jni_invoke!(jni_env, CallVoidMethod, j, method_add, jelt);
+        }
+        j
     }
 
     boxed_call_through!();

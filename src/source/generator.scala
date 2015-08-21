@@ -385,11 +385,13 @@ abstract class Generator(spec: Spec)
   }
 
   def rustSkipGeneration(r: Record): Boolean =  r.fields.exists(f => hasExtern(f.ty.resolved))
+  def rustSkipGeneration(i: Interface): Boolean = i.methods.exists(m => m.params.exists(f => hasExtern(f.ty.resolved)))
 
   def rustSkipGeneration(td: TypeDecl): Boolean = {
     td match {
       case itd: InternTypeDecl => itd.body match {
         case r: Record => rustSkipGeneration(r)
+        case i: Interface => rustSkipGeneration(i)
         case _ => false
       }
       case etd: ExternTypeDecl => true

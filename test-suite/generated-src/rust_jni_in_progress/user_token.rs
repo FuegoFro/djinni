@@ -7,7 +7,7 @@ use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
 
-impl JType for Arc<Box<::generated_rust::UserToken>> {
+impl JType for Arc<Box<::generated_rust::user_token::UserToken>> {
     type JniType = jobject;
 
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {

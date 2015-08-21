@@ -19,7 +19,7 @@ impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedD
         assert!(j != 0 as jobject);
         ::generated_rust::record_with_nested_derivings::RecordWithNestedDerivings {
             key: i32::to_rust(jni_env, jni_invoke!(jni_env, GetIntField, j, field_key)),
-            rec: ::generated_rust::RecordWithDerivings::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_rec)),
+            rec: ::generated_rust::record_with_derivings::RecordWithDerivings::to_rust(jni_env, jni_invoke!(jni_env, GetObjectField, j, field_rec)),
         }
     }
 
@@ -32,7 +32,7 @@ impl JType for ::generated_rust::record_with_nested_derivings::RecordWithNestedD
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,
                                                       i32::from_rust(jni_env, r.key).for_variadic(),
-                                                      ::generated_rust::RecordWithDerivings::from_rust(jni_env, r.rec).for_variadic()))
+                                                      ::generated_rust::record_with_derivings::RecordWithDerivings::from_rust(jni_env, r.rec).for_variadic()))
     }
 
     fn to_rust_boxed(jni_env: *mut JNIEnv, j: jobject) -> Self {

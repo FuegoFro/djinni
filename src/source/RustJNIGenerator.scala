@@ -117,6 +117,9 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
   }
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
+    if (rustSkipGeneration(i)) {
+      return
+    }
     writeFile(ident.name, origin, (w: IndentWriter) => {
       w.wl("use std::boxed::Box;")
       w.wl("use std::sync::Arc;")

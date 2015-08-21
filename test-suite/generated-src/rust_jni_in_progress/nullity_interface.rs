@@ -7,7 +7,7 @@ use support_lib::support::JType;
 use support_lib::jni_ffi::{JNIEnv, jobject, jclass};
 use generated_rust_jni;
 
-impl JType for Arc<Box<::generated_rust::NullityInterface>> {
+impl JType for Arc<Box<::generated_rust::nullity_interface::NullityInterface>> {
     type JniType = jobject;
 
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
@@ -33,7 +33,7 @@ struct NullityInterfaceJavaProxy {
 }
 
 impl NullityInterface for NullityInterfaceJavaProxy {
-    fn non_null_parameters(&self, r_p1: Arc<Box<::generated_rust::DummyInterface>>, r_p2: Arc<Box<::generated_rust::DummyInterface>>) {
+    fn non_null_parameters(&self, r_p1: Arc<Box<::generated_rust::dummy_interface::DummyInterface>>, r_p2: Arc<Box<::generated_rust::dummy_interface::DummyInterface>>) {
         let jni_env = ::support_lib::support::jni_get_thread_env();
         // TODO(rustgen): local scope
         // TODO(rustgen): use helper to cache class object and method IDs
@@ -41,10 +41,10 @@ impl NullityInterface for NullityInterfaceJavaProxy {
         let jmethod = ::support_lib::support::get_method(jni_env, class, "nonNullParameters", "(Lcom/dropbox/djinni/test/DummyInterface;Lcom/dropbox/djinni/test/DummyInterface;)V");
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, CallVoidMethod, self.javaRef, jmethod,
-                    Arc::<Box<::generated_rust::DummyInterface>>::from_rust(jni_env, r_p1),
-                    Arc::<Box<::generated_rust::DummyInterface>>::from_rust(jni_env, r_p2));
+                    Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::from_rust(jni_env, r_p1),
+                    Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::from_rust(jni_env, r_p2));
     }
-    fn non_null_return(&self, r_should_return_null: bool) -> Arc<Box<::generated_rust::DummyInterface>> {
+    fn non_null_return(&self, r_should_return_null: bool) -> Arc<Box<::generated_rust::dummy_interface::DummyInterface>> {
         let jni_env = ::support_lib::support::jni_get_thread_env();
         // TODO(rustgen): local scope
         // TODO(rustgen): use helper to cache class object and method IDs
@@ -53,9 +53,9 @@ impl NullityInterface for NullityInterfaceJavaProxy {
         // TODO(rustgen): handle local refs correctly
         let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod,
                     bool::from_rust(jni_env, r_should_return_null));
-        Arc::<Box<::generated_rust::DummyInterface>>::to_rust(jni_env, jret)
+        Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::to_rust(jni_env, jret)
     }
-    fn nullable_parameters(&self, r_p1: Option<Arc<Box<::generated_rust::DummyInterface>>>, r_p2: Option<Arc<Box<::generated_rust::DummyInterface>>>) {
+    fn nullable_parameters(&self, r_p1: Option<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>, r_p2: Option<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>) {
         let jni_env = ::support_lib::support::jni_get_thread_env();
         // TODO(rustgen): local scope
         // TODO(rustgen): use helper to cache class object and method IDs
@@ -63,10 +63,10 @@ impl NullityInterface for NullityInterfaceJavaProxy {
         let jmethod = ::support_lib::support::get_method(jni_env, class, "nullableParameters", "(Lcom/dropbox/djinni/test/DummyInterface;Lcom/dropbox/djinni/test/DummyInterface;)V");
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, CallVoidMethod, self.javaRef, jmethod,
-                    Option::<Arc<Box<::generated_rust::DummyInterface>>>::from_rust(jni_env, r_p1),
-                    Option::<Arc<Box<::generated_rust::DummyInterface>>>::from_rust(jni_env, r_p2));
+                    Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::from_rust(jni_env, r_p1),
+                    Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::from_rust(jni_env, r_p2));
     }
-    fn nullable_return(&self, r_should_return_null: bool) -> Option<Arc<Box<::generated_rust::DummyInterface>>> {
+    fn nullable_return(&self, r_should_return_null: bool) -> Option<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>> {
         let jni_env = ::support_lib::support::jni_get_thread_env();
         // TODO(rustgen): local scope
         // TODO(rustgen): use helper to cache class object and method IDs
@@ -75,11 +75,11 @@ impl NullityInterface for NullityInterfaceJavaProxy {
         // TODO(rustgen): handle local refs correctly
         let jret = jni_invoke!(jni_env, CallObjectMethod, self.javaRef, jmethod,
                     bool::from_rust(jni_env, r_should_return_null));
-        Option::<Arc<Box<::generated_rust::DummyInterface>>>::to_rust(jni_env, jret)
+        Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::to_rust(jni_env, jret)
     }
 }
 struct NullityInterfaceCppProxy {
-    rustRef: Arc<Box<::generated_rust::NullityInterface>>
+    rustRef: Arc<Box<::generated_rust::nullity_interface::NullityInterface>>
 }
 
 #[no_mangle]
@@ -94,8 +94,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nonNullParameters(jni_env: *mut JNIEnv, _this: jobject, nativeRef: jlong, j_p1: jobject, j_p2: jobject) {
     let rustRef = ::support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
-    rustRef.non_null_parameters(Arc::<Box<::generated_rust::DummyInterface>>::to_rust(jni_env, j_p1),
-                                Arc::<Box<::generated_rust::DummyInterface>>::to_rust(jni_env, j_p2));
+    rustRef.non_null_parameters(Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::to_rust(jni_env, j_p1),
+                                Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::to_rust(jni_env, j_p2));
 }
 
 #[no_mangle]
@@ -104,7 +104,7 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nonNullReturn(jni_env: *mut JNIEnv, _this: jobject, nativeRef: jlong, j_shouldReturnNull: jboolean) {
     let rustRef = ::support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
     let r = rustRef.non_null_return(bool::to_rust(jni_env, j_shouldReturnNull));
-    Arc::<Box<::generated_rust::DummyInterface>>::from_rust(jni_env, r)
+    Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::from_rust(jni_env, r)
 }
 
 #[no_mangle]
@@ -112,8 +112,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nullableParameters(jni_env: *mut JNIEnv, _this: jobject, nativeRef: jlong, j_p1: jobject, j_p2: jobject) {
     let rustRef = ::support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
-    rustRef.nullable_parameters(Option::<Arc<Box<::generated_rust::DummyInterface>>>::to_rust(jni_env, j_p1),
-                                Option::<Arc<Box<::generated_rust::DummyInterface>>>::to_rust(jni_env, j_p2));
+    rustRef.nullable_parameters(Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::to_rust(jni_env, j_p1),
+                                Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::to_rust(jni_env, j_p2));
 }
 
 #[no_mangle]
@@ -122,5 +122,5 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nullableReturn(jni_env: *mut JNIEnv, _this: jobject, nativeRef: jlong, j_shouldReturnNull: jboolean) {
     let rustRef = ::support_lib::support::CppProxyHandle::<NullityInterface>::get(nativeRef);
     let r = rustRef.nullable_return(bool::to_rust(jni_env, j_shouldReturnNull));
-    Option::<Arc<Box<::generated_rust::DummyInterface>>>::from_rust(jni_env, r)
+    Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::from_rust(jni_env, r)
 }

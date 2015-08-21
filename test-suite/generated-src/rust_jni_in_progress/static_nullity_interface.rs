@@ -11,8 +11,8 @@ use generated_rust_jni;
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nonNullParameters(jni_env: *mut JNIEnv, _class: jclass, j_p1: jobject, j_p2: jobject) {
-    ::static_nullity_interface::non_null_parameters(Arc::<Box<::generated_rust::DummyInterface>>::to_rust(jni_env, j_p1),
-                                                    Arc::<Box<::generated_rust::DummyInterface>>::to_rust(jni_env, j_p2));
+    ::static_nullity_interface::non_null_parameters(Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::to_rust(jni_env, j_p1),
+                                                    Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::to_rust(jni_env, j_p2));
 }
 
 #[no_mangle]
@@ -20,15 +20,15 @@ pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nonNullPar
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nonNullReturn(jni_env: *mut JNIEnv, _class: jclass, j_shouldReturnNull: jboolean) -> jobject {
     let r = ::static_nullity_interface::non_null_return(bool::to_rust(jni_env, j_shouldReturnNull));
-    Arc::<Box<::generated_rust::DummyInterface>>::from_rust(jni_env, r)
+    Arc::<Box<::generated_rust::dummy_interface::DummyInterface>>::from_rust(jni_env, r)
 }
 
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nullableParameters(jni_env: *mut JNIEnv, _class: jclass, j_p1: jobject, j_p2: jobject) {
-    ::static_nullity_interface::nullable_parameters(Option::<Arc<Box<::generated_rust::DummyInterface>>>::to_rust(jni_env, j_p1),
-                                                    Option::<Arc<Box<::generated_rust::DummyInterface>>>::to_rust(jni_env, j_p2));
+    ::static_nullity_interface::nullable_parameters(Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::to_rust(jni_env, j_p1),
+                                                    Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::to_rust(jni_env, j_p2));
 }
 
 #[no_mangle]
@@ -36,10 +36,10 @@ pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nullablePa
 #[allow(non_snake_case)]
 pub extern "C" fn Java_com_dropbox_djinni_test_StaticNullityInterface_nullableReturn(jni_env: *mut JNIEnv, _class: jclass, j_shouldReturnNull: jboolean) -> jobject {
     let r = ::static_nullity_interface::nullable_return(bool::to_rust(jni_env, j_shouldReturnNull));
-    Option::<Arc<Box<::generated_rust::DummyInterface>>>::from_rust(jni_env, r)
+    Option::<Arc<Box<::generated_rust::dummy_interface::DummyInterface>>>::from_rust(jni_env, r)
 }
 
-impl JType for Arc<Box<::generated_rust::StaticNullityInterface>> {
+impl JType for Arc<Box<::generated_rust::static_nullity_interface::StaticNullityInterface>> {
     type JniType = jobject;
 
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
@@ -61,7 +61,7 @@ impl JType for Arc<Box<::generated_rust::StaticNullityInterface>> {
 }
 
 struct StaticNullityInterfaceCppProxy {
-    rustRef: Arc<Box<::generated_rust::StaticNullityInterface>>
+    rustRef: Arc<Box<::generated_rust::static_nullity_interface::StaticNullityInterface>>
 }
 
 #[no_mangle]
