@@ -65,6 +65,12 @@ class JNIMarshal(spec: Spec) extends Marshal(spec) {
     case _ => "jobject"
   }
 
+  def rustImports(tm: MExpr): Set[String] = tm.base match {
+    case tp: MParam => Set()
+    case e: MExtern => throw new AssertionError("MExtern not implemented")
+    case _ => Set(s"use support_lib::jni_ffi::${toJniType(tm, false)};")
+  }
+
   // The mangled Java typename without the "L...;" decoration useful only for class reflection on our own type
   def undecoratedTypename(name: String, ty: TypeDef): String = {
     val javaClassName = idJava.ty(name)

@@ -121,8 +121,6 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
-      w.wl("use std::boxed::Box;")
-      w.wl("use std::sync::Arc;")
       w.wl("use support_lib::support::JType;")
       w.wl("use support_lib::jni_ffi::{JNIEnv, jobject, jclass};")
       w.wl("use generated_rust_jni;")
@@ -181,7 +179,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       val javaProxy = rustTrait + "JavaProxy"
       val rustProxy = rustTrait + "CppProxy" // Named like this because that's the native-backed Java class we generate right now
       jTypeImpl(boxedRustType, w, toRust = (w: IndentWriter) => {
-        w.wl(s"Arc::new(Box::new($javaProxy { javaRef: j }))")
+        w.wl(s"::std::sync::Arc::new(::std::boxed::Box::new($javaProxy { javaRef: j }))")
       }, fromRust = (w: IndentWriter) => {
         w.wl("// TODO(rustgen): this")
         w.wl("0 as jobject")

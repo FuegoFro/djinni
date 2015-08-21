@@ -11,6 +11,17 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
 
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustOutFolder.get)(name, origin, f)
 
+  private def writeImports(r: Record, w: IndentWriter) {
+    val imports = r.fields.map(f => marshal.imports(f.ty.resolved)).fold(Set[String]())(_ union _)
+    imports.map(w.wl)
+  }
+
+  private def writeImports(i: Interface, w: IndentWriter): Unit = {
+    val paramImports = i.methods.flatMap(m => m.params.map(f => marshal.imports(f.ty.resolved))).fold(Set[String]())(_ union _)
+    val retImports = i.methods.map(m => m.ret.fold(Set[String]())(r => marshal.imports(r.resolved))).fold(Set[String]())(_ union _)
+    (paramImports union retImports).map(w.wl)
+  }
+
   def generateModule(idl: Seq[TypeDecl]): Unit = {
     createFile(spec.rustOutFolder.get, "mod.rs", (w: IndentWriter) => {
       for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
@@ -36,6 +47,7 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
+      writeImports(r, w)
       var hasField = false
       val rustName = idRust.ty(ident)
       w.w(s"pub struct $rustName")
@@ -75,6 +87,7 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
+      writeImports(i, w)
       val rustName = idRust.ty(ident)
       // TODO(rustgen): imports
       w.w(s"pub trait $rustName").braced {

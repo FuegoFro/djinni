@@ -4,6 +4,8 @@ import djinni.ast.TypeRef
 import djinni.generatorTools.Spec
 import djinni.meta._
 
+import scala.collection.mutable
+
 class RustMarshal(spec: Spec) extends Marshal(spec) {
 
   override def typename(tm: MExpr): String = toRustType(tm)
@@ -40,8 +42,8 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
           case MMap => "HashMap"
           case d: MDef =>
             d.defType match {
-              case DEnum => "::generated_rust::" + idRust.module(d.name) + "::" + idRust.ty(d.name)
-              case DRecord => "::generated_rust::" + idRust.module(d.name) + "::" + idRust.ty(d.name)
+              case DEnum => idRust.ty(d.name)
+              case DRecord => idRust.ty(d.name)
               case DInterface => interfaceName(d.name, scoped)
             }
           case e: MExtern => throw new AssertionError("extern should have been special cased")
@@ -53,6 +55,29 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
   def toRustType(tm: MExpr): String = toRustType(false)(tm)
 
   def interfaceName(name: String, scoped: Boolean = false): String =
-    s"Arc${if(scoped)"::" else ""}<Box<::generated_rust::${idRust.module(name)}::${idRust.ty(name)}>>"
+    s"Arc${if(scoped)"::" else ""}<Box<${idRust.ty(name)}>>"
 
+  def imports(tm: MExpr): Set[String] = {
+    val baseImports: mutable.Set[String] = tm.base match {
+      case MSet => mutable.Set("use std::collections::HashSet;")
+      case MMap => mutable.Set("use std::collections::HashMap;")
+      case MDate => mutable.Set("extern crate time;", "use time::Tm;")
+      case MBinary => mutable.Set("use std::boxed::Box;")
+      case d: MDef =>
+        val item = mutable.Set(s"use generated_rust::${idRust.module(d.name)}::${idRust.ty(d.name)};")
+        d.defType match {
+          case DInterface =>
+            item += ("use std::sync::Arc;", "use std::boxed::Box;")
+          case _ =>
+        }
+        item
+      case e: MExtern => throw new AssertionError("MExtern not implemented")
+      case _ => mutable.Set()
+    }
+    for (arg <- tm.args) {
+      val argImports = imports(arg)
+      baseImports ++= argImports
+    }
+    baseImports.toSet
+  }
 }
