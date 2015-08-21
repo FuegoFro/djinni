@@ -6,10 +6,11 @@ use support_lib::support::{GlobalRef};
 use support_lib::jni_ffi::{JNIEnv, jobject, jlong, jstring};
 use generated_rust::user_token::UserToken;
 
-// Todo - native destroy
 // Todo - correct strong/weak Java references
-// Todo(everywhere) - local/global JNI references
 // Todo - Cache the proxies
+// Todo - look into using catch_panic
+// Todo(everywhere) - local/global JNI references
+// Todo(everywhere) - handle JNI errors (null return values, pending exeptions)
 impl JType for Arc<Box<UserToken>> {
     type JniType = jobject;
 

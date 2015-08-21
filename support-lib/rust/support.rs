@@ -308,40 +308,8 @@ impl_for_variadic!(jobject, jobject);
  * Utilities for dealing with local and global JNI refs
  */
 
-pub struct LocalRef {
-    local_ref: jobject,
-}
-
-impl Drop for LocalRef {
-    fn drop(&mut self) {
-        let jni_env = jni_get_thread_env();
-        jni_invoke!(jni_env, DeleteLocalRef, self.local_ref);
-    }
-}
-
-impl LocalRef {
-    pub fn new(local_ref: jobject) -> LocalRef {
-        LocalRef {
-            local_ref: local_ref,
-        }
-    }
-
-    pub fn into_ptr(self) -> jobject {
-        // Return the contents and consume self without calling drop
-        // TODO RIGHT NOW - find a way to not call drop
-        self.local_ref
-    }
-}
-
 pub struct GlobalRef {
     global_ref: jobject,
-}
-
-impl Drop for GlobalRef {
-    fn drop(&mut self) {
-        let jni_env = jni_get_thread_env();
-        jni_invoke!(jni_env, DeleteGlobalRef, self.global_ref);
-    }
 }
 
 impl GlobalRef {
@@ -353,5 +321,12 @@ impl GlobalRef {
 
     pub fn get(&self) -> jobject {
         self.global_ref
+    }
+}
+
+impl Drop for GlobalRef {
+    fn drop(&mut self) {
+        let jni_env = jni_get_thread_env();
+        jni_invoke!(jni_env, DeleteGlobalRef, self.global_ref);
     }
 }
