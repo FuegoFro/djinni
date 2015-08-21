@@ -2,6 +2,7 @@ use std::boxed::Box;
 use std::sync::Arc;
 use std::mem;
 use support_lib::support::{JType, RustProxyable};
+use support_lib::support::{GlobalRef};
 use support_lib::jni_ffi::{JNIEnv, jobject, jlong, jstring};
 use generated_rust::user_token::UserToken;
 
@@ -23,14 +24,14 @@ impl JType for Arc<Box<UserToken>> {
             *Self::from_handle(handle)
         } else {
             Arc::new(Box::new(UserTokenJavaProxy {
-                java_ref: j,
+                java_ref: GlobalRef::new(jni_env, j),
             }))
         }
     }
 
     fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         match r.downcast_ref::<UserTokenJavaProxy>() {
-            Some(user_token_java_proxy) => user_token_java_proxy.java_ref,
+            Some(user_token_java_proxy) => user_token_java_proxy.java_ref.get(),
             None => {
                 // Is not a Java proxy, need to create a new CppProxy
                 // Todo - cache the CppProxys
@@ -58,8 +59,7 @@ impl RustProxyable for Arc<Box<UserToken>> {
 }
 
 struct UserTokenJavaProxy {
-    // Todo - have a global ref to the object
-    java_ref: jobject,
+    java_ref: GlobalRef,
 }
 
 impl UserToken for UserTokenJavaProxy {
@@ -69,8 +69,7 @@ impl UserToken for UserTokenJavaProxy {
         // Todo - use helper to cache class object and method IDs
         let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken");
         let method = ::support_lib::support::get_method(jni_env, class, "whoami", "()Ljava/lang/String;");
-        // Todo - unpack the global ref
-        let ret = jni_invoke!(jni_env, CallObjectMethod, self.java_ref, method);
+        let ret = jni_invoke!(jni_env, CallObjectMethod, self.java_ref.get(), method);
         String::to_rust(jni_env, ret)
     }
 }
@@ -81,4 +80,12 @@ impl UserToken for UserTokenJavaProxy {
 pub extern "C" fn Java_com_dropbox_djinni_test_UserToken_00024CppProxy_native_1whoami(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong) -> jstring {
     let obj: Box<Arc<Box<UserToken>>> = Arc::<Box<UserToken>>::from_handle(native_ref);
     String::from_rust(jni_env, obj.whoami())
+}
+
+#[no_mangle]
+#[inline(never)]
+#[allow(non_snake_case)]
+pub extern "C" fn Java_com_dropbox_djinni_test_UserToken_00024CppProxy_nativeDestroy(_jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong) {
+    let _to_delete: Box<Arc<Box<UserToken>>> = Arc::<Box<UserToken>>::from_handle(native_ref);
+    // Let the destructor run on the Box and its Arc when _to_delete goes out of scope.
 }
