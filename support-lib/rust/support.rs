@@ -1,5 +1,7 @@
 use std::ffi::CString;
 use std::slice;
+use std::collections::{HashMap, HashSet};
+use std::hash::Hash;
 use encoding::all::UTF_16LE;
 use encoding::{Encoding, EncoderTrap};
 use libc::{c_int, c_uint, c_long, c_double};
@@ -259,6 +261,96 @@ impl<T: JType> JType for Vec<T> {
             jni_invoke!(jni_env, CallVoidMethod, j, method_add, jelt);
         }
         j
+    }
+
+    boxed_call_through!();
+}
+
+impl<E: JType + Eq + Hash> JType for HashSet<E> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        assert!(j != 0 as Self::JniType);
+        let hash_set_class = get_class(jni_env, "java/util/HashSet");
+        let hash_set_method_size = get_method(jni_env, hash_set_class, "size", "()I");
+        let hash_set_method_iterator = get_method(jni_env, hash_set_class, "iterator", "()Ljava/util/Iterator;");
+        let iterator_class = get_class(jni_env, "java/util/Iterator");
+        let iterator_method_next = get_method(jni_env, iterator_class, "next", "()Ljava/lang/Object;");
+        assert!(bool::to_rust(jni_env, jni_invoke!(jni_env, IsInstanceOf, j, hash_set_class)));
+        let size = jni_invoke!(jni_env, CallIntMethod, j, hash_set_method_size);
+        let mut rust_hash_set = HashSet::<E>::with_capacity(size as usize);
+        let it = jni_invoke!(jni_env, CallObjectMethod, hash_set_class, hash_set_method_iterator);
+        for _ in 0..size {
+            let entry = jni_invoke!(jni_env, CallObjectMethod, it, iterator_method_next);
+            // Todo - exception check
+            rust_hash_set.insert(E::to_rust_boxed(jni_env, entry));
+        }
+        rust_hash_set
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
+        let hash_set_class = get_class(jni_env, "java/util/HashSet");
+        let hash_set_method_constructor = get_method(jni_env, hash_set_class, "<init>", "(I)V");
+        let hash_set_method_add = get_method(jni_env, hash_set_class, "add", "(Ljava/lang/Object;)Z");
+        assert!(r.len() <= jint::max_value() as usize);
+        let size = r.len();
+        let java_hash_set = jni_invoke!(jni_env, NewObject, hash_set_class, hash_set_method_constructor, size as jint);
+        // Todo - exception check
+        for entry in r {
+            // Todo - handle local refs properly
+            jni_invoke!(jni_env, CallBooleanMethod, java_hash_set, hash_set_method_add, E::from_rust_boxed(jni_env, entry));
+            // Todo - exception check
+        }
+        java_hash_set
+    }
+
+    boxed_call_through!();
+}
+
+impl<K: JType + Eq + Hash, V: JType> JType for HashMap<K, V> {
+    type JniType = jobject;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        assert!(j != 0 as Self::JniType);
+        let hash_map_class = get_class(jni_env, "java/util/HashMap");
+        let hash_map_method_size = get_method(jni_env, hash_map_class, "size", "()I");
+        let hash_map_method_entry_set = get_method(jni_env, hash_map_class, "entrySet", "()Ljava/util/Set;");
+        let entry_set_class = get_class(jni_env, "java/util/Set");
+        let entry_set_method_iterator = get_method(jni_env, entry_set_class, "iterator", "()Ljava/util/Iterator;");
+        let entry_class = get_class(jni_env, "java/util/Map$Entry");
+        let entry_method_get_key = get_method(jni_env, entry_class, "getKey", "()Ljava/lang/Object;");
+        let entry_method_get_value = get_method(jni_env, entry_class, "getValue", "()Ljava/lang/Object;");
+        let iterator_class = get_class(jni_env, "java/util/Iterator");
+        let iterator_method_next = get_method(jni_env, iterator_class, "next", "()Ljava/lang/Object;");
+        assert!(bool::to_rust(jni_env, jni_invoke!(jni_env, IsInstanceOf, j, hash_map_class)));
+        let size = jni_invoke!(jni_env, CallIntMethod, j, hash_map_method_size);
+        let entry_set = jni_invoke!(jni_env, CallObjectMethod, j, hash_map_method_entry_set);
+        let mut rust_hash_map = HashMap::<K, V>::with_capacity(size as usize);
+        let it = jni_invoke!(jni_env, CallObjectMethod, entry_set, entry_set_method_iterator);
+        for _ in 0..size {
+            let entry = jni_invoke!(jni_env, CallObjectMethod, it, iterator_method_next);
+            let key = jni_invoke!(jni_env, CallObjectMethod, entry, entry_method_get_key);
+            let value = jni_invoke!(jni_env, CallObjectMethod, entry, entry_method_get_value);
+            // Todo - exception check
+            rust_hash_map.insert(K::to_rust_boxed(jni_env, key), V::to_rust_boxed(jni_env, value));
+        }
+        rust_hash_map
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
+        let hash_map_class = get_class(jni_env, "java/util/HashMap");
+        let hash_map_method_constructor = get_method(jni_env, hash_map_class, "<init>", "(I)V");
+        let hash_map_method_put = get_method(jni_env, hash_map_class, "put", "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+        assert!(r.len() <= jint::max_value() as usize);
+        let size = r.len();
+        let java_hash_map = jni_invoke!(jni_env, NewObject, hash_map_class, hash_map_method_constructor, size as jint);
+        // Todo - exception check
+        for (key, value) in r {
+            // Todo - handle local refs properly
+            jni_invoke!(jni_env, CallObjectMethod, java_hash_map, hash_map_method_put, K::from_rust_boxed(jni_env, key), V::from_rust_boxed(jni_env, value));
+            // Todo - exception check
+        }
+        java_hash_map
     }
 
     boxed_call_through!();
