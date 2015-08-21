@@ -14,7 +14,7 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   def generateModule(idl: Seq[TypeDecl]): Unit = {
     createFile(spec.rustOutFolder.get, "mod.rs", (w: IndentWriter) => {
       for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
-        w.wl(s"pub mod ${idRust.module(td.ident)};")
+        if (!rustSkipGeneration(td)) w.wl(s"pub mod ${idRust.module(td.ident)};")
       }
     })
   }
@@ -32,6 +32,9 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   }
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {
+    if (rustSkipGeneration(r)) {
+      return
+    }
     writeFile(ident.name, origin, (w: IndentWriter) => {
       var hasField = false
       val rustName = idRust.ty(ident)

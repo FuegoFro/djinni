@@ -18,7 +18,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
   def generateModule(idl: Seq[TypeDecl]): Unit = {
     createFile(spec.rustJniOutFolder.get, "mod.rs", (w: IndentWriter) => {
       for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
-        w.wl(s"pub mod ${idRust.module(td.ident)};")
+        if (!rustSkipGeneration(td)) w.wl(s"pub mod ${idRust.module(td.ident)};")
       }
     })
   }
@@ -45,10 +45,11 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
   }
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {
+    if (rustSkipGeneration(r)) {
+      return
+    }
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val fqRustName = s"::generated_rust::${idRust.module(ident)}::${idRust.ty(ident)}"
-
-      if (r.fields.map(f => f.ty.resolved).collect { case e: MExtern => e }.nonEmpty) return
 
       w.wl("#[macro_use(jni_invoke)]")
       w.wl("use support_lib;")
@@ -68,16 +69,21 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         }
         w.wl
         w.wl("assert!(j != 0 as jobject);")
-        w.w(fqRustName).braced {
-          for (f <- r.fields) {
-            val rustField = idRust.field(f.ident)
-            val fieldId = "field_" + rustField
-            val jniFieldAccess = toJniCall(f.ty, (jt: String) => s"jni_invoke!(jni_env, Get${jt}Field, j, $fieldId)")
-            try {
-              val toRust = jniMarshal.toRust(f.ty, jniFieldAccess)
-              w.wl(s"$rustField: $toRust,")
-            } catch {
-              case e: AssertionError => w.wl(s"// would grab $fieldId, but ${e.getMessage}")
+        w.w(fqRustName)
+        if (r.fields.isEmpty) {
+          w.wl(";")
+        } else {
+          w.braced {
+            for (f <- r.fields) {
+              val rustField = idRust.field(f.ident)
+              val fieldId = "field_" + rustField
+              val jniFieldAccess = toJniCall(f.ty, (jt: String) => s"jni_invoke!(jni_env, Get${jt}Field, j, $fieldId)")
+              try {
+                val toRust = jniMarshal.toRust(f.ty, jniFieldAccess)
+                w.wl(s"$rustField: $toRust,")
+              } catch {
+                case e: AssertionError => w.wl(s"// would grab $fieldId, but ${e.getMessage}")
+              }
             }
           }
         }

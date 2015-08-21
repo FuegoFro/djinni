@@ -384,6 +384,18 @@ abstract class Generator(spec: Spec)
     })
   }
 
+  def rustSkipGeneration(r: Record): Boolean =  r.fields.exists(f => hasExtern(f.ty.resolved))
+
+  def rustSkipGeneration(td: TypeDecl): Boolean = {
+    td match {
+      case itd: InternTypeDecl => itd.body match {
+        case r: Record => rustSkipGeneration(r)
+        case _ => false
+      }
+      case etd: ExternTypeDecl => true
+    }
+  }
+
   def generate(idl: Seq[TypeDecl]) {
     for (td <- idl.collect { case itd: InternTypeDecl => itd }) td.body match {
       case e: Enum =>

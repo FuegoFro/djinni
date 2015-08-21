@@ -111,4 +111,11 @@ def isInterface(ty: MExpr): Boolean = {
 def isOptionalInterface(ty: MExpr): Boolean = {
   ty.base == MOptional && ty.args.length == 1 && isInterface(ty.args.head)
 }
+
+  def hasExtern(ty: MExpr): Boolean = {
+    ty.base match {
+      case e: MExtern => true
+      case _ => ty.args.exists(hasExtern)
+    }
+  }
 }

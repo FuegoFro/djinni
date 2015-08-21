@@ -120,9 +120,9 @@ fi
     --objcpp-out "$temp_out_relative/objc" \
     --objc-type-prefix DB \
     \
-    --rust-out "$temp_out_relative/rust" \
+    --rust-out "$temp_out/rust" \
     \
-    --rust-jni-out "$temp_out_relative/rust_jni" \
+    --rust-jni-out "$temp_out/rust_jni" \
     \
     --list-in-files "./generated-src/inFileList.txt" \
     --list-out-files "./generated-src/outFileList.txt"\
@@ -156,10 +156,6 @@ cp "$base_dir/djinni/yaml-test.djinni" "$temp_out/yaml"
     --objc-out "$temp_out_relative/objc" \
     --objcpp-out "$temp_out_relative/objc" \
     --objc-type-prefix DB \
-    \
-    --rust-out "$temp_out/rust" \
-    \
-    --rust-jni-out "$temp_out/rust_jni" \
     \
     --idl "$temp_out_relative/yaml/yaml-test.djinni" \
 )

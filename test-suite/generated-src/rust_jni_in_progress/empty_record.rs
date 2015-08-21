@@ -15,8 +15,7 @@ impl JType for ::generated_rust::empty_record::EmptyRecord {
         let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/EmptyRecord");
 
         assert!(j != 0 as jobject);
-        ::generated_rust::empty_record::EmptyRecord {
-        }
+        ::generated_rust::empty_record::EmptyRecord;
     }
 
     fn from_rust(jni_env: *mut JNIEnv, r: Self) {
