@@ -4,9 +4,13 @@
 use std::sync::Arc;
 use std::boxed::Box;
 use generated_rust::dummy_interface::DummyInterface;
-pub trait NullityInterface {
+use mopa;
+
+pub trait NullityInterface: mopa::Any {
     fn non_null_parameters(&self, p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterface>>);
     fn non_null_return(&self, should_return_null: bool) -> Arc<Box<DummyInterface>>;
     fn nullable_parameters(&self, p1: Option<Arc<Box<DummyInterface>>>, p2: Option<Arc<Box<DummyInterface>>>);
     fn nullable_return(&self, should_return_null: bool) -> Option<Arc<Box<DummyInterface>>>;
 }
+
+mopafy!(NullityInterface);

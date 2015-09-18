@@ -1,6 +1,6 @@
 @extern "duration.yaml"
 
-test_duration = interface +c {
+test_duration = interface +c +r {
 	static hoursString(dt: duration<i32, h>): string;
 	static minutesString(dt: duration<i32, min>): string;
 	static secondsString(dt: duration<i32, s>): string;

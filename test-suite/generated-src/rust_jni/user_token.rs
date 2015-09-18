@@ -31,17 +31,16 @@ impl JType for Arc<Box<UserToken>> {
     }
 
     fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
-        match r.downcast_ref::<UserTokenJavaProxy>() {
-            Some(user_token_java_proxy) => user_token_java_proxy.java_ref.get(),
-            None => {
-                // Is not a Java proxy, need to create a new CppProxy
-                // Todo - cache the CppProxys
-                let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken$CppProxy");
-                let constructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(J)V");
-                let handle = Self::to_handle(r.clone());
-                jni_invoke!(jni_env, NewObject, class, constructor, handle)
-            },
+        if let Some(user_token_java_proxy) = r.downcast_ref::<UserTokenJavaProxy>() {
+            return user_token_java_proxy.java_ref.get();
         }
+
+        // Is not a Java proxy, need to create a new CppProxy
+        // Todo - cache the CppProxys
+        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/UserToken$CppProxy");
+        let constructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(J)V");
+        let handle = Self::to_handle(r.clone());
+        jni_invoke!(jni_env, NewObject, class, constructor, handle)
     }
 
     boxed_call_through!();

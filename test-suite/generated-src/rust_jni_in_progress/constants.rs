@@ -3,8 +3,16 @@
 
 #[macro_use(jni_invoke)]
 use support_lib;
-use support_lib::support::{JType, ForVariadic};
-use support_lib::jni_ffi::{JNIEnv, jobject};
+use support_lib::support::get_class;
+use support_lib::support::get_field;
+use support_lib::jni_ffi::jobject;
+use support_lib::support::ForVariadic;
+use support_lib::support::JType;
+use support_lib::support::get_method;
+use support_lib::jni_ffi::jint;
+use support_lib::jni_ffi::JNIEnv;
+use generated_rust::constants::Constants;
+use support_lib::jni_ffi::jstring;
 
 impl JType for ::generated_rust::constants::Constants {
     type JniType = jobject;
@@ -12,9 +20,9 @@ impl JType for ::generated_rust::constants::Constants {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/Constants");
-        let field_some_integer = ::support_lib::support::get_field(jni_env, class, "mSomeInteger", "I");
-        let field_some_string = ::support_lib::support::get_field(jni_env, class, "mSomeString", "Ljava/lang/String;");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/Constants");
+        let field_some_integer = get_field(jni_env, class, "mSomeInteger", "I");
+        let field_some_string = get_field(jni_env, class, "mSomeString", "Ljava/lang/String;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::constants::Constants {
@@ -23,11 +31,11 @@ impl JType for ::generated_rust::constants::Constants {
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/Constants");
-        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(ILjava/lang/String;)V");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/Constants");
+        let jconstructor = get_method(jni_env, class, "<init>", "(ILjava/lang/String;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

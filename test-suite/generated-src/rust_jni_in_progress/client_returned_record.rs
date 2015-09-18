@@ -3,8 +3,16 @@
 
 #[macro_use(jni_invoke)]
 use support_lib;
-use support_lib::support::{JType, ForVariadic};
-use support_lib::jni_ffi::{JNIEnv, jobject};
+use support_lib::support::get_class;
+use support_lib::support::get_field;
+use support_lib::jni_ffi::jobject;
+use support_lib::support::ForVariadic;
+use generated_rust::client_returned_record::ClientReturnedRecord;
+use support_lib::support::JType;
+use support_lib::support::get_method;
+use support_lib::jni_ffi::JNIEnv;
+use support_lib::jni_ffi::jstring;
+use support_lib::jni_ffi::jlong;
 
 impl JType for ::generated_rust::client_returned_record::ClientReturnedRecord {
     type JniType = jobject;
@@ -12,10 +20,10 @@ impl JType for ::generated_rust::client_returned_record::ClientReturnedRecord {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ClientReturnedRecord");
-        let field_record_id = ::support_lib::support::get_field(jni_env, class, "mRecordId", "J");
-        let field_content = ::support_lib::support::get_field(jni_env, class, "mContent", "Ljava/lang/String;");
-        let field_misc = ::support_lib::support::get_field(jni_env, class, "mMisc", "Ljava/lang/String;");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/ClientReturnedRecord");
+        let field_record_id = get_field(jni_env, class, "mRecordId", "J");
+        let field_content = get_field(jni_env, class, "mContent", "Ljava/lang/String;");
+        let field_misc = get_field(jni_env, class, "mMisc", "Ljava/lang/String;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::client_returned_record::ClientReturnedRecord {
@@ -25,11 +33,11 @@ impl JType for ::generated_rust::client_returned_record::ClientReturnedRecord {
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/ClientReturnedRecord");
-        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(JLjava/lang/String;Ljava/lang/String;)V");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/ClientReturnedRecord");
+        let jconstructor = get_method(jni_env, class, "<init>", "(JLjava/lang/String;Ljava/lang/String;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

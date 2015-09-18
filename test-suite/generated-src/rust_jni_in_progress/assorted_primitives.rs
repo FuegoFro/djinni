@@ -3,8 +3,21 @@
 
 #[macro_use(jni_invoke)]
 use support_lib;
-use support_lib::support::{JType, ForVariadic};
-use support_lib::jni_ffi::{JNIEnv, jobject};
+use support_lib::support::get_class;
+use support_lib::jni_ffi::jdouble;
+use support_lib::support::get_field;
+use support_lib::jni_ffi::jshort;
+use support_lib::jni_ffi::jobject;
+use support_lib::jni_ffi::jboolean;
+use support_lib::support::ForVariadic;
+use support_lib::support::JType;
+use support_lib::support::get_method;
+use support_lib::jni_ffi::jint;
+use support_lib::jni_ffi::JNIEnv;
+use support_lib::jni_ffi::jbyte;
+use support_lib::jni_ffi::jlong;
+use support_lib::jni_ffi::jfloat;
+use generated_rust::assorted_primitives::AssortedPrimitives;
 
 impl JType for ::generated_rust::assorted_primitives::AssortedPrimitives {
     type JniType = jobject;
@@ -12,21 +25,21 @@ impl JType for ::generated_rust::assorted_primitives::AssortedPrimitives {
     fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
         // TODO(rustgen): have a local scope here
         // TODO(rustgen): use a helper to get the class/methods so they're cached
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
-        let field_b = ::support_lib::support::get_field(jni_env, class, "mB", "Z");
-        let field_eight = ::support_lib::support::get_field(jni_env, class, "mEight", "B");
-        let field_sixteen = ::support_lib::support::get_field(jni_env, class, "mSixteen", "S");
-        let field_thirtytwo = ::support_lib::support::get_field(jni_env, class, "mThirtytwo", "I");
-        let field_sixtyfour = ::support_lib::support::get_field(jni_env, class, "mSixtyfour", "J");
-        let field_fthirtytwo = ::support_lib::support::get_field(jni_env, class, "mFthirtytwo", "F");
-        let field_fsixtyfour = ::support_lib::support::get_field(jni_env, class, "mFsixtyfour", "D");
-        let field_o_b = ::support_lib::support::get_field(jni_env, class, "mOB", "Ljava/lang/Boolean;");
-        let field_o_eight = ::support_lib::support::get_field(jni_env, class, "mOEight", "Ljava/lang/Byte;");
-        let field_o_sixteen = ::support_lib::support::get_field(jni_env, class, "mOSixteen", "Ljava/lang/Short;");
-        let field_o_thirtytwo = ::support_lib::support::get_field(jni_env, class, "mOThirtytwo", "Ljava/lang/Integer;");
-        let field_o_sixtyfour = ::support_lib::support::get_field(jni_env, class, "mOSixtyfour", "Ljava/lang/Long;");
-        let field_o_fthirtytwo = ::support_lib::support::get_field(jni_env, class, "mOFthirtytwo", "Ljava/lang/Float;");
-        let field_o_fsixtyfour = ::support_lib::support::get_field(jni_env, class, "mOFsixtyfour", "Ljava/lang/Double;");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
+        let field_b = get_field(jni_env, class, "mB", "Z");
+        let field_eight = get_field(jni_env, class, "mEight", "B");
+        let field_sixteen = get_field(jni_env, class, "mSixteen", "S");
+        let field_thirtytwo = get_field(jni_env, class, "mThirtytwo", "I");
+        let field_sixtyfour = get_field(jni_env, class, "mSixtyfour", "J");
+        let field_fthirtytwo = get_field(jni_env, class, "mFthirtytwo", "F");
+        let field_fsixtyfour = get_field(jni_env, class, "mFsixtyfour", "D");
+        let field_o_b = get_field(jni_env, class, "mOB", "Ljava/lang/Boolean;");
+        let field_o_eight = get_field(jni_env, class, "mOEight", "Ljava/lang/Byte;");
+        let field_o_sixteen = get_field(jni_env, class, "mOSixteen", "Ljava/lang/Short;");
+        let field_o_thirtytwo = get_field(jni_env, class, "mOThirtytwo", "Ljava/lang/Integer;");
+        let field_o_sixtyfour = get_field(jni_env, class, "mOSixtyfour", "Ljava/lang/Long;");
+        let field_o_fthirtytwo = get_field(jni_env, class, "mOFthirtytwo", "Ljava/lang/Float;");
+        let field_o_fsixtyfour = get_field(jni_env, class, "mOFsixtyfour", "Ljava/lang/Double;");
 
         assert!(j != 0 as jobject);
         ::generated_rust::assorted_primitives::AssortedPrimitives {
@@ -47,11 +60,11 @@ impl JType for ::generated_rust::assorted_primitives::AssortedPrimitives {
         }
     }
 
-    fn from_rust(jni_env: *mut JNIEnv, r: Self) {
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
         // TODO(rustgen): cache the class/methods
         // TODO(rustgen): class object should have a ref around it
-        let class = ::support_lib::support::get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
-        let jconstructor = ::support_lib::support::get_method(jni_env, class, "<init>", "(ZBSIJFDLjava/lang/Boolean;Ljava/lang/Byte;Ljava/lang/Short;Ljava/lang/Integer;Ljava/lang/Long;Ljava/lang/Float;Ljava/lang/Double;)V");
+        let class = get_class(jni_env, "com/dropbox/djinni/test/AssortedPrimitives");
+        let jconstructor = get_method(jni_env, class, "<init>", "(ZBSIJFDLjava/lang/Boolean;Ljava/lang/Byte;Ljava/lang/Short;Ljava/lang/Integer;Ljava/lang/Long;Ljava/lang/Float;Ljava/lang/Double;)V");
 
         // TODO(rustgen): handle local refs correctly
         jni_invoke!(jni_env, NewLocalRef, jni_invoke!(jni_env, NewObject, class, jconstructor,

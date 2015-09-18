@@ -398,6 +398,16 @@ abstract class Generator(spec: Spec)
     }
   }
 
+  def unionOverRecord[T](r: Record, things: MExpr => Set[T]): Set[T] = {
+    r.fields.map(f => things(f.ty.resolved)).fold(Set[T]())(_ | _)
+  }
+
+  def unionOverInterface[T](i: Interface, things: MExpr => Set[T]): Set[T] = {
+    val paramImports = i.methods.flatMap(m => m.params.map(f => things(f.ty.resolved))).fold(Set[T]())(_ | _)
+    val retImports = i.methods.map(m => m.ret.fold(Set[T]())(r => things(r.resolved))).fold(Set[T]())(_ | _)
+    paramImports | retImports
+  }
+
   def generate(idl: Seq[TypeDecl]) {
     for (td <- idl.collect { case itd: InternTypeDecl => itd }) td.body match {
       case e: Enum =>

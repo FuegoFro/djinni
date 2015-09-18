@@ -46,7 +46,7 @@ constants = record {
 }
 
 # Interface containing constants
-constants_interface = interface +c {
+constants_interface = interface +c +r {
     const bool_constant: bool = true;
     const i8_constant: i8 = 1;
     const i16_constant: i16 = 2;

@@ -3,8 +3,10 @@
 
 use std::sync::Arc;
 use std::boxed::Box;
-use generated_rust::cpp_exception::CppException;
-pub trait CppException {
+use mopa;
+
+pub trait CppException: mopa::Any {
     fn throw_an_exception(&self) -> i32;
-    fn get() -> Arc<Box<CppException>>;
 }
+
+mopafy!(CppException);

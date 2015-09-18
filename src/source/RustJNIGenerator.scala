@@ -15,6 +15,18 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustJniOutFolder.get)(name, origin, f)
 
+  private def writeImports(r: Record, w: IndentWriter, others: Set[String]) {
+    val rustImports = unionOverRecord(r, rustMarshal.imports)
+    val jniImports = unionOverRecord(r, jniMarshal.rustImports)
+    (rustImports | jniImports | others).map(w.wl)
+  }
+
+  private def writeImports(i: Interface, w: IndentWriter, others: Set[String]): Unit = {
+    val rustImports = unionOverInterface(i, rustMarshal.imports)
+    val jniImports = unionOverInterface(i, jniMarshal.rustImports)
+    (rustImports | jniImports | others).map(w.wl)
+  }
+
   def generateModule(idl: Seq[TypeDecl]): Unit = {
     createFile(spec.rustJniOutFolder.get, "mod.rs", (w: IndentWriter) => {
       for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
@@ -53,26 +65,31 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
       w.wl("#[macro_use(jni_invoke)]")
       w.wl("use support_lib;")
-      w.wl("use support_lib::support::{JType, ForVariadic};")
-      w.wl("use support_lib::jni_ffi::{JNIEnv, jobject};") // This list shouldn't be hardcoded
+      writeImports(r, w, Set(
+        "use support_lib::support::JType;",
+        "use support_lib::support::ForVariadic;",
+        "use support_lib::support::get_class;",
+        "use support_lib::support::get_field;",
+        "use support_lib::support::get_method;",
+        "use support_lib::jni_ffi::JNIEnv;",
+        "use support_lib::jni_ffi::jobject;"
+      ) ++ rustMarshal.imports(MExpr(MDef(ident, 0, DRecord, r), Seq.empty)))
       w.wl
       jTypeImpl(fqRustName, w, toRust = (w: IndentWriter) => {
         w.wl("// TODO(rustgen): have a local scope here")
         w.wl("// TODO(rustgen): use a helper to get the class/methods so they're cached")
         val classLookup = q(jniMarshal.undecoratedTypename(ident, r))
-        w.wl(s"let class = ::support_lib::support::get_class(jni_env, $classLookup);")
+        w.wl(s"let class = get_class(jni_env, $classLookup);")
         for (f <- r.fields) {
           val rustField = idRust.field(f.ident)
           val javaFieldName = idJava.field(f.ident)
           val javaSig = q(jniMarshal.fqTypename(f.ty))
-          w.wl(s"let field_$rustField = ::support_lib::support::get_field(jni_env, class, ${q(javaFieldName)}, $javaSig);")
+          w.wl(s"let field_$rustField = get_field(jni_env, class, ${q(javaFieldName)}, $javaSig);")
         }
         w.wl
         w.wl("assert!(j != 0 as jobject);")
         w.w(fqRustName)
-        if (r.fields.isEmpty) {
-          w.wl(";")
-        } else {
+        if (r.fields.nonEmpty) {
           w.braced {
             for (f <- r.fields) {
               val rustField = idRust.field(f.ident)
@@ -91,9 +108,9 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         w.wl("// TODO(rustgen): cache the class/methods")
         w.wl("// TODO(rustgen): class object should have a ref around it")
         val classLookup = q(jniMarshal.undecoratedTypename(ident, r))
-        w.wl(s"let class = ::support_lib::support::get_class(jni_env, $classLookup);")
+        w.wl(s"let class = get_class(jni_env, $classLookup);")
         val constructorSig = q(jniMarshal.javaMethodSignature(r.fields, None))
-        w.wl(s"let jconstructor = ::support_lib::support::get_method(jni_env, class, ${q("<init>")}, $constructorSig);")
+        w.wl(s"let jconstructor = get_method(jni_env, class, ${q("<init>")}, $constructorSig);")
         w.wl
         w.wl("// TODO(rustgen): handle local refs correctly")
         val call = "jni_invoke!(jni_env, NewLocalRef, jni_invoke!("
@@ -121,9 +138,22 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
-      w.wl("use support_lib::support::JType;")
-      w.wl("use support_lib::jni_ffi::{JNIEnv, jobject, jclass};")
-      w.wl("use generated_rust_jni;")
+      writeImports(i, w, Set(
+        "use std::mem;",
+        "use support_lib::support::JType;",
+        "use support_lib::support::jni_get_thread_env;",
+        "use support_lib::support::get_class;",
+        "use support_lib::support::get_field;",
+        "use support_lib::support::get_method;",
+        "use support_lib::support::GlobalRef;",
+        "use support_lib::support::RustProxyable;",
+        "use support_lib::support::ForVariadic;",
+        "use support_lib::jni_ffi::JNIEnv;",
+        "use support_lib::jni_ffi::jclass;",
+        "use support_lib::jni_ffi::jobject;",
+        "use support_lib::jni_ffi::jlong;",
+        "use generated_rust_jni;"
+      ) ++ rustMarshal.imports(MExpr(MDef(ident, 0, DInterface, i), Seq.empty)))
 
       val rustModule = idRust.module(ident)
       // Generate CEXPORT functions for JNI to call.
@@ -145,7 +175,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
             f
           }
         } else {
-          w.w(s"""pub extern "C" fn ${prefix}_00024CppProxy_$methodNameMunged(jni_env: *mut JNIEnv, _this: jobject, nativeRef: jlong${preComma(paramList)})""").braced {
+          w.w(s"""pub extern "C" fn ${prefix}_00024CppProxy_$methodNameMunged(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong${preComma(paramList)})$jniRetType""").braced {
             f
           }
         }
@@ -178,16 +208,69 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       val boxedRustType = rustMarshal.interfaceName(ident)
       val javaProxy = rustTrait + "JavaProxy"
       val rustProxy = rustTrait + "CppProxy" // Named like this because that's the native-backed Java class we generate right now
+      val classLookup = jniMarshal.undecoratedTypename(ident, i)
+      w.wl("// TODO(rustgen): correct strong/weak Java references")
+      w.wl("// TODO(rustgen): cache the proxies")
+      w.wl("// TODO(rustgen): look into using catch_panic")
+      val javaProxyClass: String = q(classLookup + "$CppProxy")
       jTypeImpl(boxedRustType, w, toRust = (w: IndentWriter) => {
-        w.wl(s"::std::sync::Arc::new(::std::boxed::Box::new($javaProxy { javaRef: j }))")
+        w.wl(s"let proxy_class = get_class(jni_env, $javaProxyClass);")
+        w.wl("let object_class = jni_invoke!(jni_env, GetObjectClass, j);")
+        w.wl("let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));")
+        if (i.ext.rust && i.ext.java) {
+          w.wl("if is_proxy {")
+          w.increase()
+        }
+        if (i.ext.rust) {
+          w.wl("""let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");""")
+          w.wl("let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);")
+          w.wl("*Self::from_handle(handle)")
+        }
+        if (i.ext.rust && i.ext.java) {
+          w.decrease()
+          w.wl("} else {")
+          w.increase()
+        }
+        if (i.ext.java) {
+          w.wl(s"Arc::new(Box::new($javaProxy { java_ref: GlobalRef::new(jni_env, j) }))")
+        }
+        if (i.ext.rust && i.ext.java) {
+          w.decrease()
+          w.wl("}")
+        }
       }, fromRust = (w: IndentWriter) => {
-        w.wl("// TODO(rustgen): this")
-        w.wl("0 as jobject")
+        if (i.ext.java) {
+          w.w(s"if let Some(proxy) = r.downcast_ref::<$javaProxy>()").braced {
+            w.wl("return proxy.java_ref.get();")
+          }
+        }
+        if (i.ext.rust) {
+          w.wl("// Is not a Java proxy, need to create a new CppProxy")
+          w.wl("// TODO(rustgen) - cache the CppProxys")
+          w.wl(s"let class = ::support_lib::support::get_class(jni_env, $javaProxyClass);")
+          w.wl("let constructor = ::support_lib::support::get_method(jni_env, class, \"<init>\", \"(J)V\");")
+          w.wl("let handle = Self::to_handle(r.clone());")
+          w.wl("jni_invoke!(jni_env, NewObject, class, constructor, handle)")
+        }
       })
-      w.wl
+      if (i.ext.rust) {
+        w.wl
+        w.w(s"impl RustProxyable for Arc<Box<$rustTrait>>").braced {
+          w.w("fn to_handle(self) -> jlong").braced {
+            w.wl("// Convert our box into a pointer, leaving the memory there and not running")
+            w.wl("// the destructor on the contents. We can't use Box::into_raw since it's unstable.")
+            w.wl("unsafe { mem::transmute(Box::new(self)) }")
+          }
+          w.w("fn from_handle(rust_proxy_handle: jlong) -> Box<Self>").braced {
+            w.wl("// Convert our pointer back into a box. We can't use Box::from_raw since it's unstable.")
+            w.wl("unsafe { mem::transmute(rust_proxy_handle as *mut Arc<Box<Self>>) }")
+          }
+        }
+      }
       if (i.ext.java) {
+        w.wl
         w.w(s"struct $javaProxy").braced {
-          w.wl("javaRef: jobject")
+          w.wl("java_ref: GlobalRef")
         }
         w.wl
         w.w(s"impl $rustTrait for $javaProxy").braced {
@@ -199,21 +282,20 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
               var params = "&self" + preComma(m.params.map(paramFormat).mkString(", "))
               val returnType = rustMarshal.returnType(m.ret)
               w.w(s"fn $rustMethodName($params)$returnType").braced {
-                w.wl("let jni_env = ::support_lib::support::jni_get_thread_env();")
+                w.wl("let jni_env = jni_get_thread_env();")
                 w.wl("// TODO(rustgen): local scope")
                 w.wl("// TODO(rustgen): use helper to cache class object and method IDs")
-                val classLookup = q(jniMarshal.undecoratedTypename(ident, i))
-                w.wl(s"let class = ::support_lib::support::get_class(jni_env, $classLookup);")
+                w.wl(s"let class = get_class(jni_env, ${q(classLookup)});")
                 val methodSig = q(jniMarshal.javaMethodSignature(m.params, m.ret))
-                w.wl(s"let jmethod = ::support_lib::support::get_method(jni_env, class, ${q(javaMethodName)}, $methodSig);")
+                w.wl(s"let jmethod = get_method(jni_env, class, ${q(javaMethodName)}, $methodSig);")
                 w.wl("// TODO(rustgen): handle local refs correctly")
                 val call = m.ret.fold("jni_invoke!(jni_env, CallVoidMethod")(r => "let jret = " + toJniCall(r, (jt: String) => s"jni_invoke!(jni_env, Call${jt}Method"))
                 w.w(call)
-                w.w(", self.javaRef, jmethod")
+                w.w(", self.java_ref.get(), jmethod")
                 if (m.params.nonEmpty) {
                   w.wl(",")
                   writeAlignedCall(w, " " * "jni_invoke!(".length, m.params, ")", p => {
-                    jniMarshal.fromRust(p.ty, "r_" + idRust.field(p.ident))
+                    jniMarshal.fromRust(p.ty, "r_" + idRust.field(p.ident)) + ".for_variadic()"
                   })
                 }
                 else w.w(")")
@@ -230,19 +312,21 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       }
 
       if (i.ext.rust) {
+        w.wl
         w.w(s"struct $rustProxy").braced {
-          w.wl(s"rustRef: $boxedRustType")
+          w.wl(s"rust_ref: $boxedRustType")
         }
         nativeFn("nativeDestroy", false, Seq.empty, None, {
-          w.wl("// TODO(rustgen): remove proxy from cache")
+          w.wl(s"let _to_delete: Box<Arc<Box<$rustTrait>>> = Arc::<Box<$rustTrait>>::from_handle(native_ref);")
+          w.wl("// Let the destructor run on the Box and its Arc when _to_delete goes out of scope.")
         })
         for (m <- i.methods if !m.static) {
           try {
             nativeFn("native_" + idJava.method(m.ident), false, m.params, m.ret, {
-              w.wl(s"let rustRef = ::support_lib::support::CppProxyHandle::<$rustTrait>::get(nativeRef);")
+              w.wl(s"let rust_ref: Box<Arc<Box<$rustTrait>>> = Arc::<Box<$rustTrait>>::from_handle(native_ref);")
               val methodName = idRust.method(m.ident)
               val ret = m.ret.fold("")(r => "let r = ")
-              val call = s"rustRef.$methodName("
+              val call = s"rust_ref.$methodName("
               try {
                 writeAlignedCall(w, ret + call, m.params, ");", p => jniMarshal.toRust(p.ty, "j_" + idJava.local(p.ident)))
               } catch {
@@ -271,7 +355,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         toRust(w)
       }
       w.wl
-      w.w("fn from_rust(jni_env: *mut JNIEnv, r: Self)").braced {
+      w.w("fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType").braced {
         fromRust(w)
       }
       w.wl

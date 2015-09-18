@@ -12,14 +12,11 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   def writeFile(name: String, origin: String, f: IndentWriter => Unit) = writeRustFileGeneric(spec.rustOutFolder.get)(name, origin, f)
 
   private def writeImports(r: Record, w: IndentWriter) {
-    val imports = r.fields.map(f => marshal.imports(f.ty.resolved)).fold(Set[String]())(_ union _)
-    imports.map(w.wl)
+    unionOverRecord(r, marshal.imports).map(w.wl)
   }
 
-  private def writeImports(i: Interface, w: IndentWriter): Unit = {
-    val paramImports = i.methods.flatMap(m => m.params.map(f => marshal.imports(f.ty.resolved))).fold(Set[String]())(_ union _)
-    val retImports = i.methods.map(m => m.ret.fold(Set[String]())(r => marshal.imports(r.resolved))).fold(Set[String]())(_ union _)
-    (paramImports union retImports).map(w.wl)
+  private def writeImports(i: Interface, w: IndentWriter, thisType: String): Unit = {
+    (unionOverInterface(i, marshal.imports) - s"use generated_rust::$thisType;").map(w.wl)
   }
 
   def generateModule(idl: Seq[TypeDecl]): Unit = {
@@ -87,11 +84,13 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
-      writeImports(i, w)
+      writeImports(i, w, s"${idRust.module(ident)}::${idRust.ty(ident)}")
       val rustName = idRust.ty(ident)
       // TODO(rustgen): imports
-      w.w(s"pub trait $rustName").braced {
-        for (f <- i.methods) {
+      w.wl("use mopa;")
+      w.wl
+      w.w(s"pub trait $rustName: mopa::Any").braced {
+        for (f <- i.methods if !f.static) {
           val methodName = idRust.method(f.ident)
           try {
             def paramFormat(param: Field) = idRust.field(param.ident) + ": " + marshal.paramType(param.ty)
@@ -109,6 +108,8 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"// const $constName goes here")
         }
       }
+      w.wl
+      w.wl(s"mopafy!($rustName);")
     })
   }
 
