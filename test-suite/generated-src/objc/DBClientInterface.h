@@ -14,10 +14,7 @@
                                    utf8string:(nonnull NSString *)utf8string
                                          misc:(nullable NSString *)misc;
 
-- (double)identifierCheck:(nonnull NSData *)data
-                        r:(int32_t)r
-                     jret:(int64_t)jret;
-
+/** identifier_check(data: binary, r: i32, jret: i64): f64; */
 - (nonnull NSString *)returnStr;
 
 - (nonnull NSString *)methTakingInterface:(nullable id<DBClientInterface>)i;

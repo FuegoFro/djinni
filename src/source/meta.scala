@@ -117,8 +117,8 @@ def isOptionalInterface(ty: MExpr): Boolean = {
         // just for now
       case MDate => true
       case MBinary => true
-      case MSet => true
-      case MMap => true
+//      case MSet => true
+//      case MMap => true
 
       case e: MExtern => true
       case _ => ty.args.exists(hasExtern)

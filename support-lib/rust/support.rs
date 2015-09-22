@@ -279,7 +279,7 @@ impl<E: JType + Eq + Hash> JType for HashSet<E> {
         assert!(bool::to_rust(jni_env, jni_invoke!(jni_env, IsInstanceOf, j, hash_set_class)));
         let size = jni_invoke!(jni_env, CallIntMethod, j, hash_set_method_size);
         let mut rust_hash_set = HashSet::<E>::with_capacity(size as usize);
-        let it = jni_invoke!(jni_env, CallObjectMethod, hash_set_class, hash_set_method_iterator);
+        let it = jni_invoke!(jni_env, CallObjectMethod, j, hash_set_method_iterator);
         for _ in 0..size {
             let entry = jni_invoke!(jni_env, CallObjectMethod, it, iterator_method_next);
             // Todo - exception check

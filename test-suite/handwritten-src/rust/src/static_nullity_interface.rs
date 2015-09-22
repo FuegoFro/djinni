@@ -8,7 +8,6 @@ pub fn non_null_parameters(p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterf
 }
 
 pub fn non_null_return(should_return_null: bool) -> Arc<Box<DummyInterface>> {
-    assert!(!should_return_null, "Cannot return null for non-optional function in Rust");
     Arc::new(Box::new(DummyInterfaceImpl))
 }
 
@@ -23,11 +22,3 @@ pub fn nullable_return(should_return_null: bool) -> Option<Arc<Box<DummyInterfac
         Some(Arc::new(Box::new(DummyInterfaceImpl)))
     }
 }
-
-/*
-    static non_null_parameters(p1: dummy_interface, p2: dummy_interface);
-    static non_null_return(should_return_null: bool): dummy_interface;
-
-    static nullable_parameters(p1: optional<dummy_interface>, p2: optional<dummy_interface>);
-    static nullable_return(should_return_null: bool): optional<dummy_interface>;
-*/

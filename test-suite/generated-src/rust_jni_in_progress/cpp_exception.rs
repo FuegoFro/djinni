@@ -20,6 +20,13 @@ use support_lib::jni_ffi::jclass;
 use support_lib::jni_ffi::jlong;
 use std::mem;
 
+/*
+pub fn get() -> Arc<Box<CppException>> {
+
+}
+
+*/
+
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
@@ -38,6 +45,7 @@ impl JType for Arc<Box<CppException>> {
         let proxy_class = get_class(jni_env, "com/dropbox/djinni/test/CppException$CppProxy");
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
+        assert!(is_proxy);
         let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
         let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
         *Self::from_handle(handle)
@@ -91,5 +99,7 @@ pub extern "C" fn Java_com_dropbox_djinni_test_CppException_00024CppProxy_native
 pub extern "C" fn Java_com_dropbox_djinni_test_CppException_00024CppProxy_native_1throwAnException(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong) -> jint {
     let rust_ref: Box<Arc<Box<CppException>>> = Arc::<Box<CppException>>::from_handle(native_ref);
     let r = rust_ref.throw_an_exception();
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
     i32::from_rust(jni_env, r)
 }

@@ -7,7 +7,6 @@
 #include <cstdint>
 #include <memory>
 #include <string>
-#include <vector>
 
 namespace testsuite {
 
@@ -21,8 +20,7 @@ public:
     /** Returns record of given string */
     virtual ClientReturnedRecord get_record(int64_t record_id, const std::string & utf8string, const std::experimental::optional<std::string> & misc) = 0;
 
-    virtual double identifier_check(const std::vector<uint8_t> & data, int32_t r, int64_t jret) = 0;
-
+    /** identifier_check(data: binary, r: i32, jret: i64): f64; */
     virtual std::string return_str() = 0;
 
     virtual std::string meth_taking_interface(const std::shared_ptr<ClientInterface> & i) = 0;

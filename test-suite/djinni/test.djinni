@@ -40,7 +40,8 @@ test_helpers = interface +c +r {
     # Ensures that we generate integer translation code
     static assorted_primitives_id(i: assorted_primitives): assorted_primitives;
 
-    static id_binary(b: binary): binary;
+    # TODO(rustgen) - uncomment this once rust supports binary
+    # static id_binary(b: binary): binary;
 }
 
 # Empty record

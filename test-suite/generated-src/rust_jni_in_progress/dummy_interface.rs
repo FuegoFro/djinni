@@ -30,6 +30,7 @@ impl JType for Arc<Box<DummyInterface>> {
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
         if is_proxy {
+            assert!(is_proxy);
             let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
             let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
             *Self::from_handle(handle)

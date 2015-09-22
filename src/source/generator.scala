@@ -112,6 +112,7 @@ package object generatorTools {
                             module: IdentConverter,
                             method: IdentConverter,
                             field: IdentConverter,
+                            local: IdentConverter,
                             enum: IdentConverter,
                             const: IdentConverter)
 
@@ -129,7 +130,7 @@ package object generatorTools {
     val javaDefault = JavaIdentStyle(camelUpper, camelUpper, camelLower, camelLower, camelLower, underCaps, underCaps)
     val cppDefault = CppIdentStyle(camelUpper, camelUpper, camelUpper, underLower, underLower, underLower, underCaps, underCaps)
     val objcDefault = ObjcIdentStyle(camelUpper, camelUpper, camelLower, camelLower, camelLower, camelUpper, camelUpper)
-    val rustDefault = RustIdentStyle(camelUpper, underLower, underLower, underLower, camelUpper, underCaps)
+    val rustDefault = RustIdentStyle(camelUpper, underLower, underLower, underLower, underLower, camelUpper, underCaps)
 
     val styles = Map(
       "FooBar" -> camelUpper,

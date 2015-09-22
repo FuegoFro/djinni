@@ -21,6 +21,25 @@ use support_lib::jni_ffi::jlong;
 use std::mem;
 use generated_rust::static_nullity_interface::StaticNullityInterface;
 
+/*
+pub fn non_null_parameters(p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterface>>) {
+
+}
+
+pub fn non_null_return(should_return_null: bool) -> Arc<Box<DummyInterface>> {
+
+}
+
+pub fn nullable_parameters(p1: Option<Arc<Box<DummyInterface>>>, p2: Option<Arc<Box<DummyInterface>>>) {
+
+}
+
+pub fn nullable_return(should_return_null: bool) -> Option<Arc<Box<DummyInterface>>> {
+
+}
+
+*/
+
 #[no_mangle]
 #[inline(never)]
 #[allow(non_snake_case)]
@@ -63,6 +82,7 @@ impl JType for Arc<Box<StaticNullityInterface>> {
         let proxy_class = get_class(jni_env, "com/dropbox/djinni/test/StaticNullityInterface$CppProxy");
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
+        assert!(is_proxy);
         let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
         let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
         *Self::from_handle(handle)

@@ -32,6 +32,7 @@ impl JType for Arc<Box<NullityInterface>> {
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
         if is_proxy {
+            assert!(is_proxy);
             let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
             let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
             *Self::from_handle(handle)
@@ -143,6 +144,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
     let rust_ref: Box<Arc<Box<NullityInterface>>> = Arc::<Box<NullityInterface>>::from_handle(native_ref);
     rust_ref.non_null_parameters(Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p1),
                                  Arc::<Box<DummyInterface>>::to_rust(jni_env, j_p2));
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
 }
 
 #[no_mangle]
@@ -151,6 +154,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nonNullReturn(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong, j_shouldReturnNull: jboolean) -> jobject {
     let rust_ref: Box<Arc<Box<NullityInterface>>> = Arc::<Box<NullityInterface>>::from_handle(native_ref);
     let r = rust_ref.non_null_return(bool::to_rust(jni_env, j_shouldReturnNull));
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
     Arc::<Box<DummyInterface>>::from_rust(jni_env, r)
 }
 
@@ -161,6 +166,8 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
     let rust_ref: Box<Arc<Box<NullityInterface>>> = Arc::<Box<NullityInterface>>::from_handle(native_ref);
     rust_ref.nullable_parameters(Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p1),
                                  Option::<Arc<Box<DummyInterface>>>::to_rust(jni_env, j_p2));
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
 }
 
 #[no_mangle]
@@ -169,5 +176,7 @@ pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_na
 pub extern "C" fn Java_com_dropbox_djinni_test_NullityInterface_00024CppProxy_native_1nullableReturn(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong, j_shouldReturnNull: jboolean) -> jobject {
     let rust_ref: Box<Arc<Box<NullityInterface>>> = Arc::<Box<NullityInterface>>::from_handle(native_ref);
     let r = rust_ref.nullable_return(bool::to_rust(jni_env, j_shouldReturnNull));
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
     Option::<Arc<Box<DummyInterface>>>::from_rust(jni_env, r)
 }

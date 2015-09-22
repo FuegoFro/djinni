@@ -30,12 +30,15 @@ class RustGenerator(spec: Spec) extends Generator(spec) {
   override def generateEnum(origin: String, ident: Ident, doc: Doc, e: Enum) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       val rustName = idRust.ty(ident)
+      w.wl("#[derive(PartialEq, Hash)]")
       w.w(s"pub enum $rustName").braced {
         for (o <- e.options) {
           // TODO(rustgen): write documentation
           w.wl(idRust.enum(o.ident) + ",")
         }
       }
+      w.wl
+      w.wl(s"impl Eq for $rustName {}")
     })
   }
 

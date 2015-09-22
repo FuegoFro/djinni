@@ -31,6 +31,7 @@ impl JType for Arc<Box<UserToken>> {
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
         if is_proxy {
+            assert!(is_proxy);
             let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
             let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
             *Self::from_handle(handle)
@@ -107,5 +108,7 @@ pub extern "C" fn Java_com_dropbox_djinni_test_UserToken_00024CppProxy_nativeDes
 pub extern "C" fn Java_com_dropbox_djinni_test_UserToken_00024CppProxy_native_1whoami(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong) -> jstring {
     let rust_ref: Box<Arc<Box<UserToken>>> = Arc::<Box<UserToken>>::from_handle(native_ref);
     let r = rust_ref.whoami();
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
     String::from_rust(jni_env, r)
 }

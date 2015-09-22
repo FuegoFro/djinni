@@ -27,6 +27,10 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
     (rustImports | jniImports | others).map(w.wl)
   }
 
+  private def writeImports(e: Enum, w: IndentWriter, others: Set[String]): Unit = {
+    others.map(w.wl)
+  }
+
   def generateModule(idl: Seq[TypeDecl]): Unit = {
     createFile(spec.rustJniOutFolder.get, "mod.rs", (w: IndentWriter) => {
       for (td <- idl.collect{ case itd: InternTypeDecl => itd }) {
@@ -53,7 +57,42 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
   }
 
   override def generateEnum(origin: String, ident: Ident, doc: Doc, e: Enum) {
-    writeFile(ident.name, origin, (w: IndentWriter) => {})
+    writeFile(ident.name, origin, (w: IndentWriter) => {
+      writeImports(e, w, Set(
+        "use support_lib::support::JType;",
+        "use support_lib::support::get_class;",
+        "use support_lib::support::get_method;",
+        "use support_lib::support::get_static_method;",
+        "use support_lib::jni_ffi::JNIEnv;",
+        "use support_lib::jni_ffi::jobject;",
+        "use support_lib::jni_ffi::jint;"
+      ) ++ rustMarshal.imports(MExpr(MDef(ident, 0, DEnum, e), Seq.empty)))
+      w.wl
+
+      val rustName = idRust.ty(ident)
+      val className = jniMarshal.undecoratedTypename(ident, e)
+      jTypeImpl(rustName, w, toRust = (w: IndentWriter) => {
+        w.wl(s"let class = get_class(jni_env, ${q(className)});")
+        w.wl("""let method_ordinal = get_method(jni_env, class, "ordinal", "()I");""")
+        w.wl("let ordinal = jni_invoke!(jni_env, CallIntMethod, j, method_ordinal);")
+        w.w("match ordinal").braced {
+          for ((o, i) <- e.options.view.zipWithIndex) {
+            w.wl(s"$i => $rustName::${idRust.enum(o.ident)},")
+          }
+          w.wl(s"""_ => panic!("Unknown ordinal value for enum $rustName: {}", ordinal),""")
+        }
+      }, fromRust = (w: IndentWriter) => {
+        w.wl(s"let class = get_class(jni_env, ${q(className)});")
+        w.wl(s"""let method_values = get_static_method(jni_env, class, "values", "()[L$className;");""")
+        w.wl("let values = jni_invoke!(jni_env, CallStaticObjectMethod, class, method_values);")
+        w.w("let ordinal = match r").bracedSemi {
+          for ((o, i) <- e.options.view.zipWithIndex) {
+            w.wl(s"$rustName::${idRust.enum(o.ident)} => $i,")
+          }
+        }
+        w.wl("jni_invoke!(jni_env, GetObjectArrayElement, values, ordinal as jint)")
+      })
+    })
   }
 
   override def generateRecord(origin: String, ident: Ident, doc: Doc, params: Seq[TypeParam], r: Record) {
@@ -135,6 +174,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
   override def generateInterface(origin: String, ident: Ident, doc: Doc, typeParams: Seq[TypeParam], i: Interface) {
     if (rustSkipGeneration(i)) {
+      println(s"Skipping interface $ident}")
       return
     }
     writeFile(ident.name, origin, (w: IndentWriter) => {
@@ -183,6 +223,23 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
 
       if (i.ext.rust) {
         // Put all static methods first; they don't make use of the native proxy.
+        // First we put the commented out function signatures, then we put the
+        // actual implementations. This makes the static functions easier to implement.
+        val hasStaticMethods = i.methods.exists(_.static)
+        if (hasStaticMethods) {
+          w.wl
+          w.wl("/*")
+            for (m <- i.methods if m.static) {
+              val methodName = idRust.method(m.ident)
+              val rustParams = m.params.map(p => s"${idRust.local(p.ident)}: ${rustMarshal.paramType(p.ty)}").mkString(", ")
+              val rustReturn = rustMarshal.returnType(m.ret)
+              w.w(s"pub fn $methodName($rustParams)$rustReturn").braced {
+                w.wl // Blank line
+              }
+              w.wl
+            }
+          w.wl("*/")
+        }
         for (m <- i.methods if m.static) {
           nativeFn(idJava.method(m.ident), true, m.params, m.ret, {
             val methodName = idRust.method(m.ident)
@@ -214,14 +271,17 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       w.wl("// TODO(rustgen): look into using catch_panic")
       val javaProxyClass: String = q(classLookup + "$CppProxy")
       jTypeImpl(boxedRustType, w, toRust = (w: IndentWriter) => {
-        w.wl(s"let proxy_class = get_class(jni_env, $javaProxyClass);")
-        w.wl("let object_class = jni_invoke!(jni_env, GetObjectClass, j);")
-        w.wl("let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));")
+        if (i.ext.rust) {
+          w.wl(s"let proxy_class = get_class(jni_env, $javaProxyClass);")
+          w.wl("let object_class = jni_invoke!(jni_env, GetObjectClass, j);")
+          w.wl("let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));")
+        }
         if (i.ext.rust && i.ext.java) {
           w.wl("if is_proxy {")
           w.increase()
         }
         if (i.ext.rust) {
+          w.wl("assert!(is_proxy);")
           w.wl("""let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");""")
           w.wl("let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);")
           w.wl("*Self::from_handle(handle)")
@@ -242,6 +302,9 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         if (i.ext.java) {
           w.w(s"if let Some(proxy) = r.downcast_ref::<$javaProxy>()").braced {
             w.wl("return proxy.java_ref.get();")
+          }
+          if (!i.ext.rust) {
+            w.wl(s"""panic!("Expected to get a $javaProxy passed in from Java")""")
           }
         }
         if (i.ext.rust) {
@@ -333,6 +396,8 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
                 case e: AssertionError => w.wl(s"// tried to call through to method ${m.ident.name}, but ${e.getMessage}")
               }
               w.wl
+              w.wl("// We don't want the destructor to run on this box until nativeDestroy is called.")
+              w.wl("mem::forget(rust_ref);")
               try {
                 m.ret.fold()(r => w.wl(jniMarshal.fromRust(r, "r")))
               } catch {

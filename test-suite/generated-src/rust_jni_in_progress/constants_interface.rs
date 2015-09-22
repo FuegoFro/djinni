@@ -29,6 +29,7 @@ impl JType for Arc<Box<ConstantsInterface>> {
         let proxy_class = get_class(jni_env, "com/dropbox/djinni/test/ConstantsInterface$CppProxy");
         let object_class = jni_invoke!(jni_env, GetObjectClass, j);
         let is_proxy = bool::to_rust(jni_env, jni_invoke!(jni_env, IsSameObject, proxy_class, object_class));
+        assert!(is_proxy);
         let native_ref_field = get_field(jni_env, proxy_class, "nativeRef", "J");
         let handle = jni_invoke!(jni_env, GetLongField, j, native_ref_field);
         *Self::from_handle(handle)
@@ -82,4 +83,6 @@ pub extern "C" fn Java_com_dropbox_djinni_test_ConstantsInterface_00024CppProxy_
 pub extern "C" fn Java_com_dropbox_djinni_test_ConstantsInterface_00024CppProxy_native_1dummy(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong) {
     let rust_ref: Box<Arc<Box<ConstantsInterface>>> = Arc::<Box<ConstantsInterface>>::from_handle(native_ref);
     rust_ref.dummy();
+    // We don't want the destructor to run on this box until nativeDestroy is called.
+    mem::forget(rust_ref);
 }
