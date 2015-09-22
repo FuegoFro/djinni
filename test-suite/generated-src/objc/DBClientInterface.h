@@ -14,7 +14,10 @@
                                    utf8string:(nonnull NSString *)utf8string
                                          misc:(nullable NSString *)misc;
 
-/** identifier_check(data: binary, r: i32, jret: i64): f64; */
+/**
+ * TODO(rustgen) - uncomment this once rust supports binary
+ * identifier_check(data: binary, r: i32, jret: i64): f64;
+ */
 - (nonnull NSString *)returnStr;
 
 - (nonnull NSString *)methTakingInterface:(nullable id<DBClientInterface>)i;
