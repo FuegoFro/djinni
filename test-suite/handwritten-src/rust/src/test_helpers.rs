@@ -174,6 +174,10 @@ pub fn assorted_primitives_id(i: AssortedPrimitives) -> AssortedPrimitives {
     return i;
 }
 
+pub fn id_binary(b: Vec<u8>) -> Vec<u8> {
+    b
+}
+
 struct NullityInterfaceImpl;
 
 impl NullityInterface for NullityInterfaceImpl {

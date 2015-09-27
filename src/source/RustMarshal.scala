@@ -35,7 +35,7 @@ class RustMarshal(spec: Spec) extends Marshal(spec) {
           case p: MPrimitive => p.rustName
           case MString => "String"
           case MDate => "Tm"
-          case MBinary => if (scoped) "Box::<[u8]>" else "Box<[u8]>"
+          case MBinary => if (scoped) "Vec::<u8>" else "Vec<u8>"
           case MOptional => throw new AssertionError("optional should have been special cased")
           case MList => "Vec"
           case MSet => "HashSet"

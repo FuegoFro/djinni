@@ -4,7 +4,7 @@ use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use encoding::all::UTF_16LE;
 use encoding::{Encoding, EncoderTrap};
-use libc::{c_int, c_uint, c_long, c_double};
+use libc::{c_int, c_uint, c_long, c_double, c_void};
 use support_lib::jni_ffi::{
     JavaVM,
     JNIEnv,
@@ -21,6 +21,9 @@ use support_lib::jni_ffi::{
     jobject,
     jstring,
     jchar,
+    jsize,
+    jbyteArray,
+    JNI_ABORT,
     JNI_VERSION_1_6,
 };
 
@@ -351,6 +354,43 @@ impl<K: JType + Eq + Hash, V: JType> JType for HashMap<K, V> {
             // Todo - exception check
         }
         java_hash_map
+    }
+
+    boxed_call_through!();
+}
+
+impl JType for Vec<u8> {
+    type JniType = jbyteArray;
+
+    fn to_rust(jni_env: *mut JNIEnv, j: Self::JniType) -> Self {
+        assert!(j != 0 as jbyteArray);
+
+        let mut ret = Vec::new();
+        let length = jni_invoke!(jni_env, GetArrayLength, j);
+
+        if (length == 0) {
+            return ret;
+        }
+
+        let ptr = jni_invoke!(jni_env, GetPrimitiveArrayCritical, j, 0 as *mut jboolean);
+
+        if ptr != (0 as *mut c_void) {
+            // Construct from ptr and length
+            ret = unsafe { slice::from_raw_parts(ptr as *mut u8, length as usize).to_vec() };
+            jni_invoke!(jni_env, ReleasePrimitiveArrayCritical, j, ptr, JNI_ABORT);
+        } // Todo - Handle failure
+
+        ret
+    }
+
+    fn from_rust(jni_env: *mut JNIEnv, r: Self) -> Self::JniType {
+        assert!(r.len() <= jsize::max_value() as usize);
+        let j = jni_invoke!(jni_env, NewByteArray, r.len() as jsize);
+        if r.len() > 0 {
+            jni_invoke!(jni_env, SetByteArrayRegion, j, 0, r.len() as jsize, r.as_ptr() as *const i8);
+        }
+
+        j
     }
 
     boxed_call_through!();

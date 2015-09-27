@@ -10,12 +10,11 @@ public class ClientInterfaceImpl implements ClientInterface {
         }
         return new ClientReturnedRecord(id, utf8string, misc);
     }
-    // TODO(rustgen) - uncomment once rust supports binary
-//	@Override
-//	public double identifierCheck(byte[] data, int r, long jret)
-//	{
-//		return 0.0;
-//	}
+    @Override
+    public double identifierCheck(byte[] data, int r, long jret)
+    {
+        return 0.0;
+    }
     @Override
     public String returnStr() {
         return "test";

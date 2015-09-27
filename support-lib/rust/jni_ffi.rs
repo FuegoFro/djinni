@@ -362,4 +362,6 @@ pub type jthrowable = *mut class__jthrowable;
 pub type jvalue = [u8; 8];
 pub type jweak = *mut class__jobject;
 
+pub const JNI_ABORT: jint = 2;           /* free buffer w/o copying back */
+
 pub const JNI_VERSION_1_6: jint = 0x00010006;
