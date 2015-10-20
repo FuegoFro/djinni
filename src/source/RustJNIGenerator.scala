@@ -72,6 +72,8 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       val rustName = idRust.ty(ident)
       val className = jniMarshal.undecoratedTypename(ident, e)
       jTypeImpl(rustName, w, toRust = (w: IndentWriter) => {
+        // TODO(rustgen) - proper nullity exception messages
+        w.wl(s"assert!(j != 0 as Self::JniType, ${q("Unexpectedly null value")});")
         w.wl(s"let class = get_class(jni_env, ${q(className)});")
         w.wl("""let method_ordinal = get_method(jni_env, class, "ordinal", "()I");""")
         w.wl("let ordinal = jni_invoke!(jni_env, CallIntMethod, j, method_ordinal);")
@@ -126,7 +128,8 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
           w.wl(s"let field_$rustField = get_field(jni_env, class, ${q(javaFieldName)}, $javaSig);")
         }
         w.wl
-        w.wl("assert!(j != 0 as jobject);")
+        // TODO(rustgen) - proper nullity exception messages
+        w.wl(s"assert!(j != 0 as Self::JniType, ${q("Unexpectedly null value")});")
         w.w(fqRustName)
         if (r.fields.nonEmpty) {
           w.braced {
@@ -180,11 +183,14 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       writeImports(i, w, Set(
         "use std::mem;",
+        "use std::thread;",
+        "use std::ptr::Unique;",
         "use support_lib::support::JType;",
         "use support_lib::support::jni_get_thread_env;",
         "use support_lib::support::get_class;",
         "use support_lib::support::get_field;",
         "use support_lib::support::get_method;",
+        "use support_lib::support::throw_runtime_exception;",
         "use support_lib::support::GlobalRef;",
         "use support_lib::support::RustProxyable;",
         "use support_lib::support::ForVariadic;",
@@ -210,13 +216,44 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         val paramList = params.map(p => "j_" + idJava.local(p.ident) + ": " + jniMarshal.paramType(p.ty)).mkString(", ")
         val jniRetType = ret.fold("")(r => " -> " + jniMarshal.fqReturnType(Some(r)))
         val methodNameMunged = name.replaceAllLiterally("_", "_1")
-        if (static) {
-          w.w(s"""pub extern "C" fn ${prefix}_$methodNameMunged(jni_env: *mut JNIEnv, _class: jclass${preComma(paramList)})$jniRetType""").braced {
+        val declaration = if (static) {
+          s"""pub extern "C" fn ${prefix}_$methodNameMunged(jni_env: *mut JNIEnv, _class: jclass${preComma(paramList)})$jniRetType"""
+        } else {
+          s"""pub extern "C" fn ${prefix}_00024CppProxy_$methodNameMunged(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong${preComma(paramList)})$jniRetType"""
+        }
+
+        w.w(declaration).braced {
+          // Need to wrap up pointers into a Unique object so they are Send/Sync and passable to thread::catch_panic
+          w.wl("let jni_env_wrapper: Unique<JNIEnv> = unsafe { Unique::new(jni_env) };")
+          val paramsToWrap = params
+            .filter(param => jniMarshal.isJavaHeapObject(param.ty))
+            .map(param => s"j_${idJava.local(param.ident)}")
+          paramsToWrap.map(paramName => w.wl(s"let $paramName: Unique<()> = unsafe { Unique::new($paramName) };"))
+
+          w.w("let result = thread::catch_panic(move ||").bracedEnd(");") {
+            // Once inside, unwrap them back to the original type.
+            w.wl("let jni_env = *jni_env_wrapper;")
+            paramsToWrap.map(paramName => w.wl(s"let $paramName = *$paramName;"))
+            // Then print out the function
             f
           }
-        } else {
-          w.w(s"""pub extern "C" fn ${prefix}_00024CppProxy_$methodNameMunged(jni_env: *mut JNIEnv, _this: jobject, native_ref: jlong${preComma(paramList)})$jniRetType""").braced {
-            f
+          // Now handle a panic if one occured
+          w.w("match result").braced {
+            if (ret.isDefined) {
+              w.wl("Ok(value) => { return value; }")
+            } else {
+              w.wl("Ok(..) => {}")
+            }
+            w.w("Err(err) =>").braced {
+              val defaultMessage = q("Caught panic in rust function")
+              w.wl(s"let message: &str = err.downcast_ref::<&str>().unwrap_or(&$defaultMessage);")
+              w.wl("// TODO(rustgen) - actually translate and preserve the panic, if possible")
+              w.wl("throw_runtime_exception(jni_env, message);")
+              if (ret.isDefined) {
+                w.wl("// This value is ignored by JNI")
+                w.wl(s"return 0 as ${jniMarshal.fqReturnType(ret)};")
+              }
+            }
           }
         }
       }
@@ -268,9 +305,11 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       val classLookup = jniMarshal.undecoratedTypename(ident, i)
       w.wl("// TODO(rustgen): correct strong/weak Java references")
       w.wl("// TODO(rustgen): cache the proxies")
-      w.wl("// TODO(rustgen): look into using catch_panic")
       val javaProxyClass: String = q(classLookup + "$CppProxy")
       jTypeImpl(boxedRustType, w, toRust = (w: IndentWriter) => {
+        // TODO(rustgen) - proper nullity exception messages
+        w.wl(s"assert!(j != 0 as Self::JniType, ${q("Unexpectedly null value")});")
+
         if (i.ext.rust) {
           w.wl(s"let proxy_class = get_class(jni_env, $javaProxyClass);")
           w.wl("let object_class = jni_invoke!(jni_env, GetObjectClass, j);")
@@ -301,7 +340,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
       }, fromRust = (w: IndentWriter) => {
         if (i.ext.java) {
           w.w(s"if let Some(proxy) = r.downcast_ref::<$javaProxy>()").braced {
-            w.wl("return proxy.java_ref.get();")
+            w.wl("return proxy.java_ref.get_local_ref(jni_env);")
           }
           if (!i.ext.rust) {
             w.wl(s"""panic!("Expected to get a $javaProxy passed in from Java")""")
@@ -326,7 +365,19 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
           }
           w.w("fn from_handle(rust_proxy_handle: jlong) -> Box<Self>").braced {
             w.wl("// Convert our pointer back into a box. We can't use Box::from_raw since it's unstable.")
+            w.wl("// Letting the result of this destruct means the the rust_proxy_handle that was passed in")
+            w.wl("// to this function is no longer valid.")
             w.wl("unsafe { mem::transmute(rust_proxy_handle as *mut Arc<Box<Self>>) }")
+          }
+          w.w("fn copy_from_handle(rust_proxy_handle: jlong) -> Self").braced {
+            w.wl("// Returns another Arc pointer to the object referrenced by the rust_proxy_handle. It")
+            w.wl("// is fine to let the result of this destruct; the rust_proxy_handle passed in will")
+            w.wl("// remain valid.")
+            w.wl("let rust_ref = Self::from_handle(rust_proxy_handle);")
+            w.wl("let copy: Self = (*rust_ref).clone();")
+            w.wl("// Forget the memory because we don't want the destructor to run yet.")
+            w.wl("mem::forget(rust_ref);")
+            w.wl("copy")
           }
         }
       }
@@ -354,7 +405,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
                 w.wl("// TODO(rustgen): handle local refs correctly")
                 val call = m.ret.fold("jni_invoke!(jni_env, CallVoidMethod")(r => "let jret = " + toJniCall(r, (jt: String) => s"jni_invoke!(jni_env, Call${jt}Method"))
                 w.w(call)
-                w.w(", self.java_ref.get(), jmethod")
+                w.w(", self.java_ref.get_local_ref(jni_env), jmethod")
                 if (m.params.nonEmpty) {
                   w.wl(",")
                   writeAlignedCall(w, " " * "jni_invoke!(".length, m.params, ")", p => {
@@ -386,7 +437,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         for (m <- i.methods if !m.static) {
           try {
             nativeFn("native_" + idJava.method(m.ident), false, m.params, m.ret, {
-              w.wl(s"let rust_ref: Box<Arc<Box<$rustTrait>>> = Arc::<Box<$rustTrait>>::from_handle(native_ref);")
+              w.wl(s"let rust_ref: Arc<Box<$rustTrait>> = Arc::<Box<$rustTrait>>::copy_from_handle(native_ref);")
               val methodName = idRust.method(m.ident)
               val ret = m.ret.fold("")(r => "let r = ")
               val call = s"rust_ref.$methodName("
@@ -396,8 +447,6 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
                 case e: AssertionError => w.wl(s"// tried to call through to method ${m.ident.name}, but ${e.getMessage}")
               }
               w.wl
-              w.wl("// We don't want the destructor to run on this box until nativeDestroy is called.")
-              w.wl("mem::forget(rust_ref);")
               try {
                 m.ret.fold()(r => w.wl(jniMarshal.fromRust(r, "r")))
               } catch {

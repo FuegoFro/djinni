@@ -39,14 +39,13 @@ public class TokenTest extends TestCase {
     }
 
     public void testNotCppToken() {
-        // TODO(rustgen) - uncomment once we can propagate exceptions
-//        boolean threw = false;
-//        try {
-//            TestHelpers.checkCppToken(new JavaToken());
-//        } catch (RuntimeException e) {
-//            threw = true;
-//        }
-//        assertTrue(threw);
-//        System.gc();
+        boolean threw = false;
+        try {
+            TestHelpers.checkCppToken(new JavaToken());
+        } catch (RuntimeException e) {
+            threw = true;
+        }
+        assertTrue(threw);
+        System.gc();
     }
 }

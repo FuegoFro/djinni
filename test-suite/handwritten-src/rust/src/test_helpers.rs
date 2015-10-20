@@ -184,7 +184,7 @@ impl NullityInterface for NullityInterfaceImpl {
     fn non_null_parameters(&self, _p1: Arc<Box<DummyInterface>>, _p2: Arc<Box<DummyInterface>>) {}
 
     fn non_null_return(&self, _should_return_null: bool) -> Arc<Box<DummyInterface>> {
-        // TODO(rustgen) - fill this out once we have catch panic
+        assert!(!_should_return_null, "Cannot return null");
         Arc::new(Box::new(DummyInterfaceImpl))
     }
 

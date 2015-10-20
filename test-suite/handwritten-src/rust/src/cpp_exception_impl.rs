@@ -4,6 +4,6 @@ pub struct CppExceptionImpl;
 
 impl CppException for CppExceptionImpl {
     fn throw_an_exception(&self) -> i32 {
-        0
+        panic!("Exception Thrown");
     }
 }

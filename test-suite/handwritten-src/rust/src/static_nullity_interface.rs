@@ -8,6 +8,7 @@ pub fn non_null_parameters(p1: Arc<Box<DummyInterface>>, p2: Arc<Box<DummyInterf
 }
 
 pub fn non_null_return(should_return_null: bool) -> Arc<Box<DummyInterface>> {
+    assert!(!should_return_null, "Cannot return null");
     Arc::new(Box::new(DummyInterfaceImpl))
 }
 

@@ -41,6 +41,9 @@ struct JavaVmWrapper(*mut JavaVM);
 
 unsafe impl Sync for JavaVmWrapper {}
 
+unsafe impl Send for JNIEnv {}
+unsafe impl Sync for JNIEnv {}
+
 pub fn jni_init(jvm: *mut JavaVM) {
     // Todo - make sure this is safe
     unsafe { global_cached_jvm = Some(JavaVmWrapper(jvm)); }
@@ -94,6 +97,11 @@ pub fn get_field(jni_env: *mut JNIEnv, class: jclass, name: &str, signature: &st
     let c_name = c_str(name);
     let c_sig = c_str(signature);
     jni_invoke!(jni_env, GetFieldID, class, c_name.as_ptr(), c_sig.as_ptr())
+}
+
+pub fn throw_runtime_exception(jni_env: *mut JNIEnv, message: &str) {
+    let runtime_exception_class = get_class(jni_env, "java/lang/RuntimeException");
+    jni_invoke!(jni_env, ThrowNew, runtime_exception_class, c_str(message).as_ptr());
 }
 
 /*
@@ -368,7 +376,7 @@ impl JType for Vec<u8> {
         let mut ret = Vec::new();
         let length = jni_invoke!(jni_env, GetArrayLength, j);
 
-        if (length == 0) {
+        if length == 0 {
             return ret;
         }
 
@@ -403,6 +411,7 @@ impl JType for Vec<u8> {
 pub trait RustProxyable {
     fn to_handle(self) -> jlong;
     fn from_handle(rust_proxy_handle: jlong) -> Box<Self>;
+    fn copy_from_handle(rust_proxy_handle: jlong) -> Self;
 }
 
 /*
@@ -451,8 +460,8 @@ impl GlobalRef {
         }
     }
 
-    pub fn get(&self) -> jobject {
-        self.global_ref
+    pub fn get_local_ref(&self, jni_env: *mut JNIEnv) -> jobject {
+        jni_invoke!(jni_env, NewLocalRef, self.global_ref)
     }
 }
 
