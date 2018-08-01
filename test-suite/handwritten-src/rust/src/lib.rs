@@ -1,4 +1,4 @@
-#![feature(unique, catch_panic, get_type_id)]
+#![feature(unique)]
 
 extern crate libc;
 #[macro_use(mopafy)]

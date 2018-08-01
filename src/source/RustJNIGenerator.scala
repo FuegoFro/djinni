@@ -183,7 +183,7 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
     writeFile(ident.name, origin, (w: IndentWriter) => {
       writeImports(i, w, Set(
         "use std::mem;",
-        "use std::thread;",
+        "use std::panic;",
         "use std::ptr::Unique;",
         "use support_lib::support::JType;",
         "use support_lib::support::jni_get_thread_env;",
@@ -223,14 +223,14 @@ class RustJNIGenerator(spec: Spec) extends Generator(spec) {
         }
 
         w.w(declaration).braced {
-          // Need to wrap up pointers into a Unique object so they are Send/Sync and passable to thread::catch_panic
+          // Need to wrap up pointers into a Unique object so they are Send/Sync and passable to panic::catch_unwind
           w.wl("let jni_env_wrapper: Unique<JNIEnv> = unsafe { Unique::new(jni_env) };")
           val paramsToWrap = params
             .filter(param => jniMarshal.isJavaHeapObject(param.ty))
             .map(param => s"j_${idJava.local(param.ident)}")
           paramsToWrap.map(paramName => w.wl(s"let $paramName: Unique<()> = unsafe { Unique::new($paramName) };"))
 
-          w.w("let result = thread::catch_panic(move ||").bracedEnd(");") {
+          w.w("let result = panic::catch_unwind(move ||").bracedEnd(");") {
             // Once inside, unwrap them back to the original type.
             w.wl("let jni_env = *jni_env_wrapper;")
             paramsToWrap.map(paramName => w.wl(s"let $paramName = *$paramName;"))
